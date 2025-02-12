@@ -225,7 +225,7 @@ class _QuizPageState extends State<QuizPage> {
         enableSuggestions: false,
         textCapitalization: TextCapitalization.none,
         controller: answerController,
-        textAlign: showExample ? TextAlign.center : TextAlign.start,
+        textAlign: showExample ? TextAlign.center : TextAlign.center,
         style: Theme.of(context).textTheme.headlineSmall?.copyWith(
               color: showExample
                   ? (quizState == QuizState.correctAnswer ? Colors.green : Colors.red)
@@ -276,6 +276,7 @@ class _QuizPageState extends State<QuizPage> {
       child: ElevatedButton(
         onPressed: showExample ? _nextQuestion : _handleAnswer,
         style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.blue, // Hintergrundfarbe auf Blau setzen
           shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
           minimumSize: Size(double.infinity, containerHeight),
         ),
