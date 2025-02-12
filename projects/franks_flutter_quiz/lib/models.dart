@@ -29,13 +29,16 @@ class AppSettings {
       );
 }
 
+// models.dart
+
 class Vocabulary {
+  final String id;
   final String german;
   final String english;
   final String englishSentence;
   final String germanSentence;
   final DateTime creationDate;
-  final String? group; // Neuer Gruppennamen (optional)
+  final String? group; // Optionaler Gruppenname
 
   int deToEnCounter;
   DateTime? deToEnLastQuery;
@@ -43,6 +46,7 @@ class Vocabulary {
   DateTime? enToDeLastQuery;
 
   Vocabulary({
+    String? id,
     required this.german,
     required this.english,
     required this.englishSentence,
@@ -52,10 +56,12 @@ class Vocabulary {
     this.deToEnLastQuery,
     this.enToDeCounter = 0,
     this.enToDeLastQuery,
-    this.group, // Neuer Parameter für den Gruppennamen
-  }) : creationDate = creationDate ?? DateTime.now();
+    this.group,
+  })  : id = id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        creationDate = creationDate ?? DateTime.now();
 
   Map<String, dynamic> toJson() => {
+    'id': id,
     'german': german,
     'english': english,
     'englishSentence': englishSentence,
@@ -65,11 +71,12 @@ class Vocabulary {
     'deToEnLastQuery': deToEnLastQuery != null ? formatDate(deToEnLastQuery!) : null,
     'enToDeCounter': enToDeCounter,
     'enToDeLastQuery': enToDeLastQuery != null ? formatDate(enToDeLastQuery!) : null,
-    'group': group, // Neuer JSON-Eintrag
+    'group': group,
   };
 
   factory Vocabulary.fromJson(Map<String, dynamic> json) {
     return Vocabulary(
+      id: json['id'] as String?,
       german: json['german'] as String,
       english: json['english'] as String,
       englishSentence: json['englishSentence'] as String,
@@ -79,15 +86,17 @@ class Vocabulary {
       deToEnLastQuery: json['deToEnLastQuery'] != null ? parseDate(json['deToEnLastQuery'] as String) : null,
       enToDeCounter: json['enToDeCounter'] is int ? json['enToDeCounter'] as int : 0,
       enToDeLastQuery: json['enToDeLastQuery'] != null ? parseDate(json['enToDeLastQuery'] as String) : null,
-      group: json['group'] as String?, // Neuer Gruppennamen
+      group: json['group'] as String?,
     );
   }
 }
 
-/// Hilfsfunktionen zum Formatieren und Parsen von Daten.
-/// Diese können ggf. auch in utilities.dart ausgelagert werden.
-String formatDate(DateTime date) =>
-    '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}';
+/// Hilfsfunktionen zum Formatieren und Parsen von Datumsangaben
+String formatDate(DateTime date) {
+  return '${date.day.toString().padLeft(2, '0')}.'
+      '${date.month.toString().padLeft(2, '0')}.'
+      '${date.year}';
+}
 
 DateTime parseDate(String dateStr) {
   final parts = dateStr.split('.');

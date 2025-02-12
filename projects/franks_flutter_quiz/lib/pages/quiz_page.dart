@@ -10,7 +10,7 @@ class QuizPage extends StatefulWidget {
   final AppSettings settings;
   final VoidCallback onUpdate;
   final bool quizGerman;
-  
+
   QuizPage({
     required this.vocabularies,
     required this.settings,
@@ -41,7 +41,7 @@ class _QuizPageState extends State<QuizPage> {
     askGerman = widget.quizGerman;
     _focusNode.requestFocus(); // Optional: Beim Seitenstart den Cursor setzen.
   }
-  
+
   @override
   void didUpdateWidget(covariant QuizPage oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -52,7 +52,7 @@ class _QuizPageState extends State<QuizPage> {
       });
     }
   }
-  
+
   /// Liefert die aktuell anzuzeigende Vokabel.
   /// Falls activeVocabulary noch nicht gesetzt ist, wird sie anhand der Gruppierung ermittelt.
   Vocabulary? get currentVocabulary {
@@ -70,7 +70,7 @@ class _QuizPageState extends State<QuizPage> {
     activeVocabulary = lowestGroup.first;
     return activeVocabulary;
   }
-  
+
   Map<String, int> _computeStats() {
     final int total = widget.vocabularies.length;
     int count0 = 0, count1_2 = 0, count3_4 = 0, countAbove4 = 0;
@@ -94,10 +94,10 @@ class _QuizPageState extends State<QuizPage> {
       '>4': countAbove4,
     };
   }
-  
+
   bool _isDueHelper(DateTime? lastQuery, int intervalDays, DateTime today) =>
       lastQuery == null || !lastQuery.add(Duration(days: intervalDays)).isAfter(today);
-  
+
   bool isDue(Vocabulary voc, bool askGerman, AppSettings settings) {
     final DateTime today = DateTime.now();
     if (askGerman) {
@@ -112,7 +112,7 @@ class _QuizPageState extends State<QuizPage> {
       return _isDueHelper(voc.enToDeLastQuery, settings.intervalFor5, today);
     }
   }
-  
+
   /// Spricht die englische Vokabel per Text-to-Speech aus.
   Future<void> _speakEnglish() async {
     final Vocabulary? voc = currentVocabulary;
@@ -120,7 +120,15 @@ class _QuizPageState extends State<QuizPage> {
     await flutterTts.setLanguage("en-US");
     await flutterTts.speak(voc.english);
   }
-  
+
+  /// Spricht die englische Vokabel per Text-to-Speech aus.
+  Future<void> _speakEnglishSentence() async {
+    final Vocabulary? voc = currentVocabulary;
+    if (voc == null) return;
+    await flutterTts.setLanguage("en-US");
+    await flutterTts.speak(voc.englishSentence);
+  }
+
   /// Prüft die Antwort auf Basis der aktuell festgelegten Vokabel.
   /// Unterstützt mehrere korrekte Lösungen (durch Komma getrennt).
   void _handleAnswer() {
@@ -147,7 +155,7 @@ class _QuizPageState extends State<QuizPage> {
       _inputEnabled = false;
     });
   }
-  
+
   /// Setzt activeVocabulary zurück, sodass beim nächsten Zugriff eine neue Vokabel gewählt wird.
   void _nextQuestion() {
     setState(() {
@@ -157,11 +165,11 @@ class _QuizPageState extends State<QuizPage> {
       activeVocabulary = null;
       _inputEnabled = true;
     });
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    _focusNode.requestFocus();
-  });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focusNode.requestFocus();
+    });
   }
-  
+
   @override
   Widget build(BuildContext context) {
     if (widget.vocabularies.isEmpty || currentVocabulary == null) {
@@ -169,11 +177,18 @@ class _QuizPageState extends State<QuizPage> {
     }
     final Vocabulary currentVoc = currentVocabulary!;
     final String questionText = askGerman ? currentVoc.german : currentVoc.english;
-    final String exampleText = askGerman ? currentVoc.germanSentence : currentVoc.englishSentence;
+    final String rawExampleText = askGerman ? currentVoc.germanSentence : currentVoc.englishSentence;
+    final bool noExample = rawExampleText.trim().isEmpty;
+    final String exampleText = noExample
+        ? (askGerman ? 'kein Text vorhanden' : 'no text available')
+        : rawExampleText;
+    final TextStyle exampleStyle = noExample
+        ? Theme.of(context).textTheme.bodyLarge!.copyWith(fontStyle: FontStyle.italic)
+        : Theme.of(context).textTheme.bodyLarge!;
     final String expectedAnswer = askGerman ? currentVoc.english : currentVoc.german;
     const double containerHeight = 60.0;
-    
-    // Fragecontainer mit AutoSizeText, falls der Text zu lang ist.
+
+    // Fragecontainer mit AutoSizeText
     final Widget questionContainer = Container(
       height: containerHeight,
       width: double.infinity,
@@ -189,13 +204,13 @@ class _QuizPageState extends State<QuizPage> {
         textAlign: TextAlign.center,
       ),
     );
-    
+
     final Color inputBorderColor = quizState == QuizState.correctAnswer
         ? Colors.green
         : quizState == QuizState.wrongAnswer
-            ? Colors.red
-            : Colors.grey;
-    
+        ? Colors.red
+        : Colors.grey;
+
     final Map<String, int> stats = _computeStats();
     final Widget statusBar = Container(
       padding: const EdgeInsets.all(8.0),
@@ -211,8 +226,8 @@ class _QuizPageState extends State<QuizPage> {
         ],
       ),
     );
-    
-    // Container um das Eingabefeld mit Rahmen.
+
+    // Eingabefeld in einem Container mit Rahmen
     final Widget inputFieldContainer = Container(
       decoration: BoxDecoration(
         border: Border.all(color: inputBorderColor, width: 3),
@@ -225,12 +240,12 @@ class _QuizPageState extends State<QuizPage> {
         enableSuggestions: false,
         textCapitalization: TextCapitalization.none,
         controller: answerController,
-        textAlign: showExample ? TextAlign.center : TextAlign.center,
+        textAlign: TextAlign.center,
         style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: showExample
-                  ? (quizState == QuizState.correctAnswer ? Colors.green : Colors.red)
-                  : Colors.black,
-            ),
+          color: showExample
+              ? (quizState == QuizState.correctAnswer ? Colors.green : Colors.red)
+              : Colors.black,
+        ),
         decoration: const InputDecoration(
           hintText: 'Deine Antwort',
           contentPadding: EdgeInsets.all(12),
@@ -243,32 +258,32 @@ class _QuizPageState extends State<QuizPage> {
         },
       ),
     );
-    
+
     // Container für die eingetragene Antwort wird nur angezeigt, wenn die Antwort korrekt ist.
     final Widget submittedAnswerContainer = (showExample && quizState == QuizState.correctAnswer)
         ? Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: Container(
-              height: containerHeight,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                border: Border.all(color: inputBorderColor, width: 3),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              alignment: Alignment.center,
-              child: AutoSizeText(
-                answerController.text,
-                style: Theme.of(context)
-                    .textTheme
-                    .headlineSmall
-                    ?.copyWith(color: inputBorderColor),
-                maxLines: 1,
-                textAlign: TextAlign.center,
-              ),
-            ),
-          )
+      padding: const EdgeInsets.only(top: 8.0),
+      child: Container(
+        height: containerHeight,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          border: Border.all(color: inputBorderColor, width: 3),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        alignment: Alignment.center,
+        child: AutoSizeText(
+          answerController.text,
+          style: Theme.of(context)
+              .textTheme
+              .headlineSmall
+              ?.copyWith(color: inputBorderColor),
+          maxLines: 1,
+          textAlign: TextAlign.center,
+        ),
+      ),
+    )
         : const SizedBox();
-    
+
     // Action-Button: Zeigt "Antwort überprüfen" oder "Nächste Vokabel" an.
     final double? fontSize = Theme.of(context).textTheme.headlineSmall?.fontSize;
     final Widget actionButton = SizedBox(
@@ -276,27 +291,36 @@ class _QuizPageState extends State<QuizPage> {
       child: ElevatedButton(
         onPressed: showExample ? _nextQuestion : _handleAnswer,
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue, // Hintergrundfarbe auf Blau setzen
+          backgroundColor: Colors.blue,
           shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
           minimumSize: Size(double.infinity, containerHeight),
         ),
         child: Text(
           showExample ? 'Nächste Vokabel' : 'Antwort überprüfen',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontSize: fontSize),
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontSize: fontSize, color: Colors.white),
         ),
       ),
     );
-    
+
     // Lautsprechersymbol-Button: Wird direkt hinter der Antwortanzeige (submittedAnswerContainer) angezeigt.
     final Widget speakButton = showExample
         ? IconButton(
-            icon: const Icon(Icons.volume_up),
-            onPressed: _speakEnglish,
-            tooltip: 'Sprich die Vokabel aus',
-          )
+      icon: const Icon(Icons.volume_up),
+      onPressed: _speakEnglish,
+      tooltip: 'Sprich die Vokabel aus',
+    )
         : const SizedBox();
-    
-    // Gesamtlayout: Der obere Bereich (scrollbar) und der fixierte Action-Button am unteren Rand.
+
+    // Lautsprechersymbol-Button: Wird direkt hinter der Antwortanzeige (submittedAnswerContainer) angezeigt.
+    final Widget speakButton2 = showExample
+        ? IconButton(
+      icon: const Icon(Icons.volume_up),
+      onPressed: _speakEnglishSentence,
+      tooltip: 'Sprich den Beispielsatz aus',
+    )
+        : const SizedBox();
+
+    // Gesamtlayout: Oberer Bereich (scrollbar) und fixierter Action-Button am unteren Rand.
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       child: Padding(
@@ -329,8 +353,8 @@ class _QuizPageState extends State<QuizPage> {
                           const SizedBox(height: 4),
                           AutoSizeText(
                             exampleText,
-                            style: Theme.of(context).textTheme.bodyLarge,
-                            maxLines: 1,
+                            style: exampleStyle,
+                            maxLines: 3,
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 20),
@@ -359,13 +383,15 @@ class _QuizPageState extends State<QuizPage> {
                             Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: AutoSizeText(
-                                'Beispielsatz (${askGerman ? "Englisch" : "Deutsch"}):\n${askGerman ? currentVoc.englishSentence : currentVoc.germanSentence}',
-                                style: Theme.of(context).textTheme.bodyLarge,
-                                maxLines: 1,
+                                'Beispielsatz (${askGerman ? "Englisch" : "Deutsch"}):\n${(askGerman ? currentVoc.englishSentence : currentVoc.germanSentence).trim().isEmpty ? (askGerman ? "no text available" : "kein text vorhanden") : (askGerman ? currentVoc.englishSentence : currentVoc.germanSentence)}',
+                                style: ((askGerman ? currentVoc.englishSentence : currentVoc.germanSentence).trim().isEmpty)
+                                    ? Theme.of(context).textTheme.bodyLarge!.copyWith(fontStyle: FontStyle.italic)
+                                    : Theme.of(context).textTheme.bodyLarge,
+                                maxLines: 3,
                                 textAlign: TextAlign.center,
                               ),
                             ),
-                          if (showExample) speakButton,
+                          if (showExample) speakButton, speakButton2
                         ],
                       ),
                     ),
