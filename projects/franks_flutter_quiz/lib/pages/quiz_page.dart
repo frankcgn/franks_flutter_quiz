@@ -10,6 +10,7 @@ class QuizPage extends StatefulWidget {
   final AppSettings settings;
   final VoidCallback onUpdate;
   final bool quizGerman;
+  
   QuizPage({
     required this.vocabularies,
     required this.settings,
@@ -38,7 +39,7 @@ class _QuizPageState extends State<QuizPage> {
   void initState() {
     super.initState();
     askGerman = widget.quizGerman;
-    _focusNode.requestFocus(); // Cursor wird beim Laden der Seite in das Eingabefeld gesetzt.
+    _focusNode.requestFocus(); // Optional: Beim Seitenstart den Cursor setzen.
   }
   
   @override
@@ -121,7 +122,7 @@ class _QuizPageState extends State<QuizPage> {
   }
   
   /// Prüft die Antwort auf Basis der aktuell festgelegten Vokabel.
-  /// Unterstützt mehrere korrekte Lösungen, getrennt durch Komma.
+  /// Unterstützt mehrere korrekte Lösungen (durch Komma getrennt).
   void _handleAnswer() {
     final Vocabulary? voc = currentVocabulary;
     if (voc == null) return;
@@ -156,7 +157,9 @@ class _QuizPageState extends State<QuizPage> {
       activeVocabulary = null;
       _inputEnabled = true;
     });
-    _focusNode.requestFocus(); // Nach dem Wechsel zur nächsten Vokabel wird der Cursor in das Eingabefeld gesetzt.
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    _focusNode.requestFocus();
+  });
   }
   
   @override
@@ -170,6 +173,7 @@ class _QuizPageState extends State<QuizPage> {
     final String expectedAnswer = askGerman ? currentVoc.english : currentVoc.german;
     const double containerHeight = 60.0;
     
+    // Fragecontainer mit AutoSizeText, falls der Text zu lang ist.
     final Widget questionContainer = Container(
       height: containerHeight,
       width: double.infinity,
@@ -208,8 +212,40 @@ class _QuizPageState extends State<QuizPage> {
       ),
     );
     
-    // Container für die eingegebene Antwort, mit Rahmen in Textfarbe.
-    final Widget submittedAnswerContainer = showExample
+    // Container um das Eingabefeld mit Rahmen.
+    final Widget inputFieldContainer = Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: inputBorderColor, width: 3),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: TextField(
+        enabled: _inputEnabled,
+        focusNode: _focusNode,
+        autocorrect: false,
+        enableSuggestions: false,
+        textCapitalization: TextCapitalization.none,
+        controller: answerController,
+        textAlign: showExample ? TextAlign.center : TextAlign.start,
+        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              color: showExample
+                  ? (quizState == QuizState.correctAnswer ? Colors.green : Colors.red)
+                  : Colors.black,
+            ),
+        decoration: const InputDecoration(
+          hintText: 'Deine Antwort',
+          contentPadding: EdgeInsets.all(12),
+          border: InputBorder.none,
+        ),
+        textInputAction: TextInputAction.done,
+        onSubmitted: (value) {
+          if (!_inputEnabled) return;
+          _handleAnswer();
+        },
+      ),
+    );
+    
+    // Container für die eingetragene Antwort wird nur angezeigt, wenn die Antwort korrekt ist.
+    final Widget submittedAnswerContainer = (showExample && quizState == QuizState.correctAnswer)
         ? Padding(
             padding: const EdgeInsets.only(top: 8.0),
             child: Container(
@@ -233,7 +269,7 @@ class _QuizPageState extends State<QuizPage> {
           )
         : const SizedBox();
     
-    // Action-Button, der seine Beschriftung und Funktion dynamisch wechselt.
+    // Action-Button: Zeigt "Antwort überprüfen" oder "Nächste Vokabel" an.
     final double? fontSize = Theme.of(context).textTheme.headlineSmall?.fontSize;
     final Widget actionButton = SizedBox(
       width: double.infinity,
@@ -250,7 +286,7 @@ class _QuizPageState extends State<QuizPage> {
       ),
     );
     
-    // Lautsprechersymbol-Button: Wird hinter der Antwortnachricht angezeigt.
+    // Lautsprechersymbol-Button: Wird direkt hinter der Antwortanzeige (submittedAnswerContainer) angezeigt.
     final Widget speakButton = showExample
         ? IconButton(
             icon: const Icon(Icons.volume_up),
@@ -259,7 +295,7 @@ class _QuizPageState extends State<QuizPage> {
           )
         : const SizedBox();
     
-    // Gesamtlayout: Oberer (scrollbarer) Content und fixierter Action-Button am unteren Rand.
+    // Gesamtlayout: Der obere Bereich (scrollbar) und der fixierte Action-Button am unteren Rand.
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       child: Padding(
@@ -278,7 +314,11 @@ class _QuizPageState extends State<QuizPage> {
                         children: [
                           statusBar,
                           const SizedBox(height: 8),
-                          questionContainer,
+                          Row(
+                            children: [
+                              Expanded(child: questionContainer),
+                            ],
+                          ),
                           const SizedBox(height: 12),
                           const Text(
                             'Beispielsatz:',
@@ -293,39 +333,7 @@ class _QuizPageState extends State<QuizPage> {
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 20),
-                          TextField(
-                            enabled: _inputEnabled,
-                            focusNode: _focusNode,
-                            autocorrect: false,
-                            enableSuggestions: false,
-                            textCapitalization: TextCapitalization.none,
-                            controller: answerController,
-                            textAlign: showExample ? TextAlign.center : TextAlign.start,
-                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                  color: showExample
-                                      ? (quizState == QuizState.correctAnswer ? Colors.green : Colors.red)
-                                      : Colors.black,
-                                ),
-                            decoration: InputDecoration(
-                              hintText: askGerman
-                                  ? 'Deine Antwort (englisches Wort)'
-                                  : 'Deine Antwort (deutsches Wort)',
-                              contentPadding: const EdgeInsets.all(12),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: inputBorderColor, width: 3),
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: inputBorderColor, width: 3),
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                            ),
-                            textInputAction: TextInputAction.done,
-                            onSubmitted: (value) {
-                              if (!_inputEnabled) return;
-                              _handleAnswer();
-                            },
-                          ),
+                          inputFieldContainer,
                           submittedAnswerContainer,
                           if (showExample && quizState == QuizState.wrongAnswer)
                             Padding(
@@ -340,10 +348,7 @@ class _QuizPageState extends State<QuizPage> {
                                 alignment: Alignment.center,
                                 child: AutoSizeText(
                                   expectedAnswer,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headlineSmall
-                                      ?.copyWith(color: Colors.blue),
+                                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Colors.blue),
                                   maxLines: 1,
                                   textAlign: TextAlign.center,
                                 ),
@@ -359,7 +364,6 @@ class _QuizPageState extends State<QuizPage> {
                                 textAlign: TextAlign.center,
                               ),
                             ),
-                          // Lautsprechersymbol-Button direkt hinter der Antwortnachricht.
                           if (showExample) speakButton,
                         ],
                       ),
