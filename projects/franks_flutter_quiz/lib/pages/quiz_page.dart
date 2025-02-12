@@ -121,7 +121,7 @@ class _QuizPageState extends State<QuizPage> {
     await flutterTts.speak(voc.english);
   }
 
-  /// Spricht die englische Vokabel per Text-to-Speech aus.
+  /// Spricht den englischen Beispielsatz per Text-to-Speech aus.
   Future<void> _speakEnglishSentence() async {
     final Vocabulary? voc = currentVocabulary;
     if (voc == null) return;
@@ -180,7 +180,7 @@ class _QuizPageState extends State<QuizPage> {
     final String rawExampleText = askGerman ? currentVoc.germanSentence : currentVoc.englishSentence;
     final bool noExample = rawExampleText.trim().isEmpty;
     final String exampleText = noExample
-        ? (askGerman ? 'kein Text vorhanden' : 'no text available')
+        ? (askGerman ? 'kein text vorhanden' : 'no text available')
         : rawExampleText;
     final TextStyle exampleStyle = noExample
         ? Theme.of(context).textTheme.bodyLarge!.copyWith(fontStyle: FontStyle.italic)
@@ -302,21 +302,35 @@ class _QuizPageState extends State<QuizPage> {
       ),
     );
 
-    // Lautsprechersymbol-Button: Wird direkt hinter der Antwortanzeige (submittedAnswerContainer) angezeigt.
-    final Widget speakButton = showExample
-        ? IconButton(
-      icon: const Icon(Icons.volume_up),
-      onPressed: _speakEnglish,
-      tooltip: 'Sprich die Vokabel aus',
-    )
-        : const SizedBox();
-
-    // Lautsprechersymbol-Button: Wird direkt hinter der Antwortanzeige (submittedAnswerContainer) angezeigt.
-    final Widget speakButton2 = showExample
-        ? IconButton(
-      icon: const Icon(Icons.volume_up),
-      onPressed: _speakEnglishSentence,
-      tooltip: 'Sprich den Beispielsatz aus',
+    // Lautsprechersymbol-Button für die Vokabel und den Beispielsatz sollen nebeneinander dargestellt werden.
+    final Widget speakButtonsRow = showExample
+        ? Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.volume_up),
+              onPressed: _speakEnglish,
+              tooltip: 'Sprich die Vokabel aus',
+            ),
+            const Text("Vokabel"),
+          ],
+        ),
+        const SizedBox(width: 16),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.volume_up),
+              onPressed: _speakEnglishSentence,
+              tooltip: 'Sprich den Beispielsatz aus',
+            ),
+            const Text("Beispielsatz"),
+          ],
+        ),
+      ],
     )
         : const SizedBox();
 
@@ -354,7 +368,6 @@ class _QuizPageState extends State<QuizPage> {
                           AutoSizeText(
                             exampleText,
                             style: exampleStyle,
-                            maxLines: 3,
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 20),
@@ -374,7 +387,6 @@ class _QuizPageState extends State<QuizPage> {
                                 child: AutoSizeText(
                                   expectedAnswer,
                                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Colors.blue),
-                                  maxLines: 1,
                                   textAlign: TextAlign.center,
                                 ),
                               ),
@@ -387,11 +399,10 @@ class _QuizPageState extends State<QuizPage> {
                                 style: ((askGerman ? currentVoc.englishSentence : currentVoc.germanSentence).trim().isEmpty)
                                     ? Theme.of(context).textTheme.bodyLarge!.copyWith(fontStyle: FontStyle.italic)
                                     : Theme.of(context).textTheme.bodyLarge,
-                                maxLines: 3,
                                 textAlign: TextAlign.center,
                               ),
                             ),
-                          if (showExample) speakButton, speakButton2
+                          if (showExample) speakButtonsRow,
                         ],
                       ),
                     ),
