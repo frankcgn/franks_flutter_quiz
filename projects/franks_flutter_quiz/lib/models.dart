@@ -35,6 +35,8 @@ class Vocabulary {
   final String englishSentence;
   final String germanSentence;
   final DateTime creationDate;
+  final String? group; // Neuer Gruppennamen (optional)
+
   int deToEnCounter;
   DateTime? deToEnLastQuery;
   int enToDeCounter;
@@ -50,31 +52,36 @@ class Vocabulary {
     this.deToEnLastQuery,
     this.enToDeCounter = 0,
     this.enToDeLastQuery,
+    this.group, // Neuer Parameter für den Gruppennamen
   }) : creationDate = creationDate ?? DateTime.now();
 
   Map<String, dynamic> toJson() => {
-        'german': german,
-        'english': english,
-        'englishSentence': englishSentence,
-        'germanSentence': germanSentence,
-        'creationDate': formatDate(creationDate),
-        'deToEnCounter': deToEnCounter,
-        'deToEnLastQuery': deToEnLastQuery != null ? formatDate(deToEnLastQuery!) : null,
-        'enToDeCounter': enToDeCounter,
-        'enToDeLastQuery': enToDeLastQuery != null ? formatDate(enToDeLastQuery!) : null,
-      };
+    'german': german,
+    'english': english,
+    'englishSentence': englishSentence,
+    'germanSentence': germanSentence,
+    'creationDate': formatDate(creationDate),
+    'deToEnCounter': deToEnCounter,
+    'deToEnLastQuery': deToEnLastQuery != null ? formatDate(deToEnLastQuery!) : null,
+    'enToDeCounter': enToDeCounter,
+    'enToDeLastQuery': enToDeLastQuery != null ? formatDate(enToDeLastQuery!) : null,
+    'group': group, // Neuer JSON-Eintrag
+  };
 
-  factory Vocabulary.fromJson(Map<String, dynamic> json) => Vocabulary(
-        german: json['german'] as String,
-        english: json['english'] as String,
-        englishSentence: json['englishSentence'] as String,
-        germanSentence: json['germanSentence'] as String,
-        creationDate: json['creationDate'] != null ? parseDate(json['creationDate'] as String) : DateTime.now(),
-        deToEnCounter: json['deToEnCounter'] is int ? json['deToEnCounter'] as int : 0,
-        deToEnLastQuery: json['deToEnLastQuery'] != null ? parseDate(json['deToEnLastQuery'] as String) : null,
-        enToDeCounter: json['enToDeCounter'] is int ? json['enToDeCounter'] as int : 0,
-        enToDeLastQuery: json['enToDeLastQuery'] != null ? parseDate(json['enToDeLastQuery'] as String) : null,
-      );
+  factory Vocabulary.fromJson(Map<String, dynamic> json) {
+    return Vocabulary(
+      german: json['german'] as String,
+      english: json['english'] as String,
+      englishSentence: json['englishSentence'] as String,
+      germanSentence: json['germanSentence'] as String,
+      creationDate: json['creationDate'] != null ? parseDate(json['creationDate'] as String) : DateTime.now(),
+      deToEnCounter: json['deToEnCounter'] is int ? json['deToEnCounter'] as int : 0,
+      deToEnLastQuery: json['deToEnLastQuery'] != null ? parseDate(json['deToEnLastQuery'] as String) : null,
+      enToDeCounter: json['enToDeCounter'] is int ? json['enToDeCounter'] as int : 0,
+      enToDeLastQuery: json['enToDeLastQuery'] != null ? parseDate(json['enToDeLastQuery'] as String) : null,
+      group: json['group'] as String?, // Neuer Gruppennamen
+    );
+  }
 }
 
 /// Hilfsfunktionen zum Formatieren und Parsen von Daten.
