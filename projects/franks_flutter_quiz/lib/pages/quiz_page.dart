@@ -188,6 +188,9 @@ class _QuizPageState extends State<QuizPage> {
     final String expectedAnswer = askGerman ? currentVoc.english : currentVoc.german;
     const double containerHeight = 60.0;
 
+    // Darkmode prüfen
+    final bool darkMode = widget.settings.darkMode;
+
     // Fragecontainer mit AutoSizeText
     final Widget questionContainer = Container(
       height: containerHeight,
@@ -212,18 +215,37 @@ class _QuizPageState extends State<QuizPage> {
         : Colors.grey;
 
     final Map<String, int> stats = _computeStats();
+
+    // Statusbar mit Querstrichen zwischen den Einträgen.
+    final List<Widget> statusWidgets = [];
+    final List<String> statusTexts = [
+      'Alle: ${stats['total']}',
+      '0: ${stats['0']}',
+      '1-2: ${stats['1-2']}',
+      '3-4: ${stats['3-4']}',
+      '>4: ${stats['>4']}'
+    ];
+    for (int i = 0; i < statusTexts.length; i++) {
+      statusWidgets.add(Text(
+        statusTexts[i],
+        style: TextStyle(color: darkMode ? Colors.white : Colors.black),
+      ));
+      if (i < statusTexts.length - 1) {
+        statusWidgets.add(Text(
+          ' | ',
+          style: TextStyle(color: darkMode ? Colors.white : Colors.black),
+        ));
+      }
+    }
     final Widget statusBar = Container(
       padding: const EdgeInsets.all(8.0),
-      color: Colors.grey[200],
+      decoration: BoxDecoration(
+        color: darkMode ? Colors.black : Colors.grey[200],
+        border: darkMode ? Border.all(color: Colors.grey) : null,
+      ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Text('Alle: ${stats['total']}'),
-          Text('0: ${stats['0']}'),
-          Text('1-2: ${stats['1-2']}'),
-          Text('3-4: ${stats['3-4']}'),
-          Text('>4: ${stats['>4']}'),
-        ],
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: statusWidgets,
       ),
     );
 
@@ -277,7 +299,6 @@ class _QuizPageState extends State<QuizPage> {
               .textTheme
               .headlineSmall
               ?.copyWith(color: inputBorderColor),
-          maxLines: 1,
           textAlign: TextAlign.center,
         ),
       ),
@@ -302,7 +323,7 @@ class _QuizPageState extends State<QuizPage> {
       ),
     );
 
-    // Lautsprechersymbol-Button für die Vokabel und den Beispielsatz sollen nebeneinander dargestellt werden.
+    // Lautsprechersymbol-Buttons in einer Zeile: Linker Button für die Vokabel, rechter für den Beispielsatz.
     final Widget speakButtonsRow = showExample
         ? Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -334,7 +355,7 @@ class _QuizPageState extends State<QuizPage> {
     )
         : const SizedBox();
 
-    // Gesamtlayout: Oberer Bereich (scrollbar) und fixierter Action-Button am unteren Rand.
+    // Gesamtlayout: Oberer (scrollbarer) Bereich und fixierter Action-Button am unteren Rand.
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       child: Padding(
