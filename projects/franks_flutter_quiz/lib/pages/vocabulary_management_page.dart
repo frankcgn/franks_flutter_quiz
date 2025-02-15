@@ -17,7 +17,7 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
   String _english = '';
   String _englishSentence = '';
   String _germanSentence = '';
-  String? _group; // Neue Variable für die Gruppe
+  String _searchQuery = '';
 
   void _showAddDialog() {
     showDialog(
@@ -38,8 +38,7 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
                       border: OutlineInputBorder(),
                     ),
                     validator: (value) {
-                      if (value == null || value.isEmpty)
-                        return 'Bitte ein deutsches Wort eingeben';
+                      if (value == null || value.isEmpty) return 'Bitte ein deutsches Wort eingeben';
                       return null;
                     },
                     onSaved: (value) => _german = value!,
@@ -51,8 +50,7 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
                       border: OutlineInputBorder(),
                     ),
                     validator: (value) {
-                      if (value == null || value.isEmpty)
-                        return 'Bitte ein englisches Wort eingeben';
+                      if (value == null || value.isEmpty) return 'Bitte ein englisches Wort eingeben';
                       return null;
                     },
                     onSaved: (value) => _english = value!,
@@ -64,8 +62,7 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
                       border: OutlineInputBorder(),
                     ),
                     validator: (value) {
-                      if (value == null || value.isEmpty)
-                        return 'Bitte einen englischen Beispielsatz eingeben';
+                      if (value == null || value.isEmpty) return 'Bitte einen englischen Beispielsatz eingeben';
                       return null;
                     },
                     onSaved: (value) => _englishSentence = value!,
@@ -77,20 +74,21 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
                       border: OutlineInputBorder(),
                     ),
                     validator: (value) {
-                      if (value == null || value.isEmpty)
-                        return 'Bitte einen deutschen Beispielsatz eingeben';
+                      if (value == null || value.isEmpty) return 'Bitte einen deutschen Beispielsatz eingeben';
                       return null;
                     },
                     onSaved: (value) => _germanSentence = value!,
                   ),
                   SizedBox(height: 12),
-                  // Neues Feld für die Gruppe (optional)
+                  // Optionales Feld für den Gruppennamen
                   TextFormField(
                     decoration: InputDecoration(
                       labelText: 'Gruppe (optional)',
                       border: OutlineInputBorder(),
                     ),
-                    onSaved: (value) => _group = value,
+                    onSaved: (value) {
+                      // Hier kannst Du den Gruppennamen übernehmen.
+                    },
                   ),
                 ],
               ),
@@ -109,7 +107,6 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
                       english: _english,
                       englishSentence: _englishSentence,
                       germanSentence: _germanSentence,
-                      group: _group, // Gruppe übernehmen
                     ));
                   });
                   widget.onUpdate();
@@ -150,8 +147,7 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
                       border: OutlineInputBorder(),
                     ),
                     validator: (value) {
-                      if (value == null || value.isEmpty)
-                        return 'Bitte ein deutsches Wort eingeben';
+                      if (value == null || value.isEmpty) return 'Bitte ein deutsches Wort eingeben';
                       return null;
                     },
                     onChanged: (value) => editedGerman = value,
@@ -164,8 +160,7 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
                       border: OutlineInputBorder(),
                     ),
                     validator: (value) {
-                      if (value == null || value.isEmpty)
-                        return 'Bitte ein englisches Wort eingeben';
+                      if (value == null || value.isEmpty) return 'Bitte ein englisches Wort eingeben';
                       return null;
                     },
                     onChanged: (value) => editedEnglish = value,
@@ -178,8 +173,7 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
                       border: OutlineInputBorder(),
                     ),
                     validator: (value) {
-                      if (value == null || value.isEmpty)
-                        return 'Bitte einen englischen Beispielsatz eingeben';
+                      if (value == null || value.isEmpty) return 'Bitte einen englischen Beispielsatz eingeben';
                       return null;
                     },
                     onChanged: (value) => editedEnglishSentence = value,
@@ -192,14 +186,12 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
                       border: OutlineInputBorder(),
                     ),
                     validator: (value) {
-                      if (value == null || value.isEmpty)
-                        return 'Bitte einen deutschen Beispielsatz eingeben';
+                      if (value == null || value.isEmpty) return 'Bitte einen deutschen Beispielsatz eingeben';
                       return null;
                     },
                     onChanged: (value) => editedGermanSentence = value,
                   ),
                   SizedBox(height: 12),
-                  // Neues Feld für die Gruppe
                   TextFormField(
                     initialValue: voc.group ?? '',
                     decoration: InputDecoration(
@@ -229,7 +221,7 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
                       deToEnLastQuery: voc.deToEnLastQuery,
                       enToDeCounter: voc.enToDeCounter,
                       enToDeLastQuery: voc.enToDeLastQuery,
-                      group: editedGroup, // Gruppe übernehmen
+                      group: editedGroup,
                     );
                   });
                   widget.onUpdate();
@@ -252,34 +244,62 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Filtere die Vokabelliste anhand des Suchbegriffs.
+    List<Vocabulary> filteredVocabs = widget.vocabularies.where((voc) {
+      return voc.german.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          voc.english.toLowerCase().contains(_searchQuery.toLowerCase());
+    }).toList();
+
     return Scaffold(
-      body: ListView.builder(
-        itemCount: widget.vocabularies.length,
-        itemBuilder: (context, index) {
-          Vocabulary voc = widget.vocabularies[index];
-          return Card(
-            margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            elevation: 3,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            child: ListTile(
-              title: Text('${voc.german} - ${voc.english}'),
-              subtitle: Text(
-                  'Erstellt: ${formatDate(voc.creationDate)}\n'
-                      'Gruppe: ${voc.group ?? "keine"}\n'
-                      'Deutsch → Englisch: ${voc.deToEnCounter} (Letzte: ${voc.deToEnLastQuery != null ? formatDate(voc.deToEnLastQuery!) : "nie"})\n'
-                      'Englisch → Deutsch: ${voc.enToDeCounter} (Letzte: ${voc.enToDeLastQuery != null ? formatDate(voc.enToDeLastQuery!) : "nie"})'
+      appBar: AppBar(
+        title: Text('Vokabeln verwalten'),
+      ),
+      body: Column(
+        children: [
+          // Suchfeld
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              decoration: InputDecoration(
+                labelText: 'Suche (Deutsch oder Englisch)',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.search),
               ),
-              isThreeLine: true,
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(icon: Icon(Icons.edit), onPressed: () => _showEditDialog(index),),
-                  IconButton(icon: Icon(Icons.delete), onPressed: () => _deleteVocabulary(index),),
-                ],
-              ),
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value;
+                });
+              },
             ),
-          );
-        },
+          ),
+          // Gefilterte Liste der Vokabeln, wobei der deutsche und englische Begriff untereinander angezeigt werden.
+          Expanded(
+            child: ListView.builder(
+              itemCount: filteredVocabs.length,
+              itemBuilder: (context, index) {
+                Vocabulary voc = filteredVocabs[index];
+                return Card(
+                  margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  elevation: 3,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  child: ListTile(
+                    title: Text(
+                      '${voc.german}\n${voc.english}',
+                      textAlign: TextAlign.start,
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(icon: Icon(Icons.edit), onPressed: () => _showEditDialog(index),),
+                        IconButton(icon: Icon(Icons.delete), onPressed: () => _deleteVocabulary(index),),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
