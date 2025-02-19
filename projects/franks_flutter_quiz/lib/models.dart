@@ -1,4 +1,5 @@
 // models.dart
+import 'package:uuid/uuid.dart';
 enum QuizState { waitingForAnswer, wrongAnswer, correctAnswer }
 
 class AppSettings {
@@ -31,8 +32,20 @@ class AppSettings {
 
 // models.dart
 
+/// Beispielhafte Hilfsfunktionen zum Formatieren/Parsen von Datumsangaben
+String formatDate(DateTime date) {
+  return '${date.day.toString().padLeft(2, '0')}.'
+      '${date.month.toString().padLeft(2, '0')}.'
+      '${date.year}';
+}
+
+DateTime parseDate(String dateStr) {
+  final parts = dateStr.split('.');
+  return DateTime(int.parse(parts[2]), int.parse(parts[1]), int.parse(parts[0]));
+}
+
 class Vocabulary {
-  final String id;
+  final String uuid; // UUID statt einfachem ID-Feld
   final String german;
   final String english;
   final String englishSentence;
@@ -46,7 +59,7 @@ class Vocabulary {
   DateTime? enToDeLastQuery;
 
   Vocabulary({
-    String? id,
+    String? uuid,
     required this.german,
     required this.english,
     required this.englishSentence,
@@ -57,11 +70,11 @@ class Vocabulary {
     this.enToDeCounter = 0,
     this.enToDeLastQuery,
     this.group,
-  })  : id = id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+  })  : uuid = uuid ?? Uuid().v4(), // Falls keine UUID übergeben wurde, generiere eine neue.
         creationDate = creationDate ?? DateTime.now();
 
   Map<String, dynamic> toJson() => {
-    'id': id,
+    'uuid': uuid,
     'german': german,
     'english': english,
     'englishSentence': englishSentence,
@@ -76,7 +89,7 @@ class Vocabulary {
 
   factory Vocabulary.fromJson(Map<String, dynamic> json) {
     return Vocabulary(
-      id: json['id'] as String?,
+      uuid: json['uuid'] as String?, // Falls null, wird im Konstruktor automatisch eine neue UUID erzeugt.
       german: json['german'] as String,
       english: json['english'] as String,
       englishSentence: json['englishSentence'] as String,
@@ -91,14 +104,3 @@ class Vocabulary {
   }
 }
 
-/// Hilfsfunktionen zum Formatieren und Parsen von Datumsangaben
-String formatDate(DateTime date) {
-  return '${date.day.toString().padLeft(2, '0')}.'
-      '${date.month.toString().padLeft(2, '0')}.'
-      '${date.year}';
-}
-
-DateTime parseDate(String dateStr) {
-  final parts = dateStr.split('.');
-  return DateTime(int.parse(parts[2]), int.parse(parts[1]), int.parse(parts[0]));
-}
