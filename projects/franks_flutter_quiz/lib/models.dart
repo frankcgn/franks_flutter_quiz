@@ -45,7 +45,7 @@ DateTime parseDate(String dateStr) {
 }
 
 class Vocabulary {
-  final String uuid; // UUID statt einfachem ID-Feld
+  final String uuid;
   final String german;
   final String english;
   final String englishSentence;

@@ -96,6 +96,7 @@ class _HomePageState extends State<HomePage> {
           onSettingsChanged: widget.onSettingsChanged,
           onSaveVocabularyList: _saveVocabularyList,
           onLoadVocabularyList: _loadVocabularyList,
+          vocabularies: vocabularies,
         ),
       ];
 

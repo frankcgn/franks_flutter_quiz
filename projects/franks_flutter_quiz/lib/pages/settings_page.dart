@@ -1,17 +1,20 @@
 // pages/settings_page.dart
 import 'package:flutter/material.dart';
 import '../models.dart';
+import '../firebase_repository.dart';
 
 class SettingsPage extends StatefulWidget {
   final AppSettings settings;
   final Function(AppSettings) onSettingsChanged;
   final Function(String) onSaveVocabularyList;
   final Future<void> Function(String) onLoadVocabularyList;
+  final List<Vocabulary> vocabularies; // Übergebe die Vokabelliste hier
   SettingsPage({
     required this.settings,
     required this.onSettingsChanged,
     required this.onSaveVocabularyList,
     required this.onLoadVocabularyList,
+    required this.vocabularies,
   });
 
   @override
@@ -23,7 +26,17 @@ class _SettingsPageState extends State<SettingsPage> {
   late TextEditingController interval3Controller;
   late TextEditingController interval4Controller;
   late TextEditingController interval5Controller;
-  
+  final FirebaseRepository firebaseRepo = FirebaseRepository();
+
+  Future<void> _saveAllVocabularies() async {
+    for (Vocabulary voc in widget.vocabularies) {
+      await firebaseRepo.saveOrUpdateVocabulary(voc);
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Alle Vokabeln wurden in die Datenbank gespeichert.')),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -32,7 +45,7 @@ class _SettingsPageState extends State<SettingsPage> {
     interval4Controller = TextEditingController(text: widget.settings.intervalFor4.toString());
     interval5Controller = TextEditingController(text: widget.settings.intervalFor5.toString());
   }
-  
+
   @override
   void dispose() {
     interval3Controller.dispose();
@@ -40,7 +53,7 @@ class _SettingsPageState extends State<SettingsPage> {
     interval5Controller.dispose();
     super.dispose();
   }
-  
+
   void _saveSettings() {
     final int interval3 = int.tryParse(interval3Controller.text) ?? 7;
     final int interval4 = int.tryParse(interval4Controller.text) ?? 14;
@@ -56,7 +69,7 @@ class _SettingsPageState extends State<SettingsPage> {
       const SnackBar(content: Text('Einstellungen gespeichert.')),
     );
   }
-  
+
   Future<void> _showSaveDialog() async {
     String fileName = "";
     await showDialog(
@@ -89,7 +102,7 @@ class _SettingsPageState extends State<SettingsPage> {
       widget.onSaveVocabularyList(fileName);
     }
   }
-  
+
   Future<void> _showLoadDialog() async {
     String fileName = "";
     await showDialog(
@@ -122,7 +135,7 @@ class _SettingsPageState extends State<SettingsPage> {
       await widget.onLoadVocabularyList(fileName);
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -167,17 +180,12 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
           const SizedBox(height: 24),
           ElevatedButton(
-            onPressed: _showSaveDialog,
-            child: const Text('Vokabelliste speichern'),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: _showLoadDialog,
-            child: const Text('Vokabelliste laden'),
+            onPressed: _saveAllVocabularies,
+            child: Text('Alle Vokabeln in Firebase speichern'),
           ),
         ],
       ),
     );
   }
-  
+
 }
