@@ -1,6 +1,7 @@
 // pages/home_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_test_01/services/database_service.dart';
+import '../firebase_repository.dart';
 import '../models/models.dart';
 import '../storage.dart';
 import '../vocabulary_list.dart';
@@ -19,7 +20,7 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   final DatabaseService _databaseService = DatabaseService();
   int _selectedIndex = 1;
   List<Vocabulary> vocabularies = [];
@@ -29,6 +30,16 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _loadVocabulariesFromDB();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Wenn die App in den Hintergrund wechselt oder pausiert, speichere alle Änderungen
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.detached) {
+      // Hier rufst du deine Funktion zum Speichern der Vokabeln auf.
+      _saveAllVocabulariesInDB();
+    }
   }
 
   Future<void> _loadVocabulariesFromDB() async {
@@ -36,8 +47,19 @@ class _HomePageState extends State<HomePage> {
     final List<Vocabulary> loadedVocab = await initialVocabularyFromDB();
     setState(() {
       vocabularies = loadedVocab;
+      print('_loadVocabulariesFromDB COUNT: ${vocabularies.length}');
     });
     print('_loadVocabulariesFromDB END');
+  }
+
+  Future<void> _saveAllVocabulariesInDB() async {
+    print('_saveAllVocabulariesInDB BEGIN');
+    final FirebaseRepository firebaseRepo = FirebaseRepository();
+
+    for (Vocabulary voc in vocabularies) {
+      await firebaseRepo.saveOrUpdateVocabulary(voc);
+    }
+    print('_saveAllVocabulariesInDB END');
   }
 
   Future<void> _loadVocabularies() async {
