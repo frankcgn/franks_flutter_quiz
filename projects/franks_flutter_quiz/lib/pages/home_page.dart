@@ -28,7 +28,16 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _loadVocabularies();
+    _loadVocabulariesFromDB();
+  }
+
+  Future<void> _loadVocabulariesFromDB() async {
+    print('_loadVocabulariesFromDB BEGIN');
+    final List<Vocabulary> loadedVocab = await initialVocabularyFromDB();
+    setState(() {
+      vocabularies = loadedVocab;
+    });
+    print('_loadVocabulariesFromDB END');
   }
 
   Future<void> _loadVocabularies() async {

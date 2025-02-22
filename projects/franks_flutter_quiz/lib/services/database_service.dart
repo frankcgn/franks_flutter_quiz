@@ -23,5 +23,12 @@ class DatabaseService {
     _vocabularyRef.add(voc);
   }
 
+  Stream<List<Vocabulary>> getVocabularyList(Stream<QuerySnapshot> querySnapshotStream) {
+    return querySnapshotStream.map((querySnapshot) {
+      return querySnapshot.docs.map((doc) {
+        return Vocabulary.fromJson(doc.data() as Map<String, dynamic>);
+      }).toList();
+    });
+  }
 
 }

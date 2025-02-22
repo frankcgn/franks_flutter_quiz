@@ -1,6 +1,24 @@
 // vocabulary_list.dart
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_test_01/services/database_service.dart';
 import '../models/vocabulary.dart';
+
+
+
+Future<List<Vocabulary>> initialVocabularyFromDB() async {
+  print('initialVocabularyFromDB');
+  final vocabularyList = await getVocabularyList(FirebaseFirestore.instance.collection(TODO_COLLETION_REF).snapshots());
+  print('Alle Vokabeln geladen');
+  return vocabularyList;
+}
+
+Future<List<Vocabulary>> getVocabularyList(Stream<QuerySnapshot> querySnapshotStream) async {
+  final querySnapshot = await querySnapshotStream.first;
+  return querySnapshot.docs.map((doc) {
+    return Vocabulary.fromJson(doc.data() as Map<String, dynamic>);
+  }).toList();
+}
 
 Future<List<Vocabulary>> initialVocabulary() async {
   final String csvData = await rootBundle.loadString('assets/vocabulary.csv');
