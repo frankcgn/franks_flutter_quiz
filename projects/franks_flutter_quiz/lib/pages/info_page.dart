@@ -1,6 +1,6 @@
 // pages/info_page.dart
 import 'package:flutter/material.dart';
-import '../models.dart';
+import '../models/appSettings.dart';
 import 'home_page.dart';
 
 class InfoPage extends StatefulWidget {

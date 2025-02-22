@@ -1,6 +1,6 @@
 // vocabulary_list.dart
 import 'package:flutter/services.dart' show rootBundle;
-import 'models.dart';
+import '../models/vocabulary.dart';
 
 Future<List<Vocabulary>> initialVocabulary() async {
   final String csvData = await rootBundle.loadString('assets/vocabulary.csv');

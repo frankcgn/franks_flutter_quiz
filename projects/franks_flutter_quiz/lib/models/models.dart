@@ -1,14 +1,16 @@
 // models.dart
 import 'package:uuid/uuid.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 enum QuizState { waitingForAnswer, wrongAnswer, correctAnswer }
 
-class AppSettings {
+class AppSettingsx {
   bool darkMode;
   int intervalFor3;
   int intervalFor4;
   int intervalFor5;
 
-  AppSettings({
+  AppSettingsx({
     this.darkMode = false,
     this.intervalFor3 = 7,
     this.intervalFor4 = 14,
@@ -22,7 +24,7 @@ class AppSettings {
         'intervalFor5': intervalFor5,
       };
 
-  factory AppSettings.fromJson(Map<String, dynamic> json) => AppSettings(
+  factory AppSettingsx.fromJson(Map<String, dynamic> json) => AppSettingsx(
         darkMode: json['darkMode'] ?? false,
         intervalFor3: json['intervalFor3'] ?? 7,
         intervalFor4: json['intervalFor4'] ?? 14,
@@ -44,7 +46,7 @@ DateTime parseDate(String dateStr) {
   return DateTime(int.parse(parts[2]), int.parse(parts[1]), int.parse(parts[0]));
 }
 
-class Vocabulary {
+class Vocabularyx {
   final String uuid;
   final String german;
   final String english;
@@ -58,7 +60,7 @@ class Vocabulary {
   int enToDeCounter;
   DateTime? enToDeLastQuery;
 
-  Vocabulary({
+  Vocabularyx({
     String? uuid,
     required this.german,
     required this.english,
@@ -87,8 +89,8 @@ class Vocabulary {
     'group': group,
   };
 
-  factory Vocabulary.fromJson(Map<String, dynamic> json) {
-    return Vocabulary(
+  factory Vocabularyx.fromJson(Map<String, dynamic> json) {
+    return Vocabularyx(
       uuid: json['uuid'] as String?, // Falls null, wird im Konstruktor automatisch eine neue UUID erzeugt.
       german: json['german'] as String,
       english: json['english'] as String,

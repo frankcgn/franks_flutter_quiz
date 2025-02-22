@@ -1,6 +1,7 @@
 // pages/settings_page.dart
 import 'package:flutter/material.dart';
-import '../models.dart';
+import '../models/appSettings.dart';
+import '../models/vocabulary.dart';
 import '../firebase_repository.dart';
 
 class SettingsPage extends StatefulWidget {

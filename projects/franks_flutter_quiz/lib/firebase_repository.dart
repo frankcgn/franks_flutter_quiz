@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'models.dart';
+import 'package:flutter_test_01/models/vocabulary.dart';
 
 class FirebaseRepository {
   final CollectionReference _collection =

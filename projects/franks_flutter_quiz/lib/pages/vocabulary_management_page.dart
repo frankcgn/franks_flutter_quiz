@@ -1,6 +1,6 @@
 // vocabulary_management_page.dart
 import 'package:flutter/material.dart';
-import '../models.dart';
+import '../models/vocabulary.dart';
 
 class VocabularyManagementPage extends StatefulWidget {
   final List<Vocabulary> vocabularies;
