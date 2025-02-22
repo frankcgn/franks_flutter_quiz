@@ -8,12 +8,14 @@ import '../models/vocabulary.dart';
 
 class QuizPage extends StatefulWidget {
   final List<Vocabulary> vocabularies;
+  List<Vocabulary> updatedVocabularies;
   final AppSettings settings;
   final VoidCallback onUpdate;
   final bool quizGerman;
 
   QuizPage({
     required this.vocabularies,
+    required this.updatedVocabularies,
     required this.settings,
     required this.onUpdate,
     required this.quizGerman,
@@ -69,6 +71,7 @@ class _QuizPageState extends State<QuizPage> {
     final List<Vocabulary> lowestGroup = groups[sortedKeys.first]!;
     lowestGroup.shuffle(Random());
     activeVocabulary = lowestGroup.first;
+    widget.updatedVocabularies.add(activeVocabulary!);
     return activeVocabulary;
   }
 

@@ -15,13 +15,7 @@ class DatabaseService {
         toFirestore: (Vocabulary, _) => Vocabulary.toJson());
   }
 
-  Stream<QuerySnapshot> getVocabularies() {
-    return _vocabularyRef.snapshots();
-  }
 
-  void addVocabulary(Vocabulary voc) async {
-    _vocabularyRef.add(voc);
-  }
 
   Stream<List<Vocabulary>> getVocabularyList(Stream<QuerySnapshot> querySnapshotStream) {
     return querySnapshotStream.map((querySnapshot) {
@@ -31,4 +25,19 @@ class DatabaseService {
     });
   }
 
+  Stream<QuerySnapshot> getVocabularies() {
+    return _vocabularyRef.snapshots();
+  }
+
+  void addVocabulary(Vocabulary voc) async {
+    _vocabularyRef.add(voc);
+  }
+
+  void updateVocabulary(String vocId, Vocabulary voc) {
+    _vocabularyRef.doc(vocId).update(voc.toJson());
+  }
+
+  void deleteVocabulary(String vocId) {
+    _vocabularyRef.doc(vocId).delete();
+  }
 }

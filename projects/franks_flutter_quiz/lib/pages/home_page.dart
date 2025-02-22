@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test_01/services/database_service.dart';
 import '../firebase_repository.dart';
-import '../models/models.dart';
 import '../storage.dart';
 import '../vocabulary_list.dart';
 import 'quiz_page.dart';
@@ -24,6 +23,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   final DatabaseService _databaseService = DatabaseService();
   int _selectedIndex = 1;
   List<Vocabulary> vocabularies = [];
+  List<Vocabulary> updatedVocabularies = [];
   bool quizGerman = true; // true: Deutsch→Englisch, false: Englisch→Deutsch
 
   @override
@@ -38,7 +38,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     // Wenn die App in den Hintergrund wechselt oder pausiert, speichere alle Änderungen
     if (state == AppLifecycleState.paused || state == AppLifecycleState.detached) {
       // Hier rufst du deine Funktion zum Speichern der Vokabeln auf.
-      _saveAllVocabulariesInDB();
+      _saveUpdatedVocabulariesInDB();
     }
   }
 
@@ -57,9 +57,22 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     final FirebaseRepository firebaseRepo = FirebaseRepository();
 
     for (Vocabulary voc in vocabularies) {
+      print('${voc.german}');
       await firebaseRepo.saveOrUpdateVocabulary(voc);
     }
     print('_saveAllVocabulariesInDB END');
+  }
+
+  Future<void> _saveUpdatedVocabulariesInDB() async {
+    print('_saveUpdatedVocabulariesInDB BEGIN');
+    final FirebaseRepository firebaseRepo = FirebaseRepository();
+
+    for (Vocabulary voc in updatedVocabularies) {
+      print('${voc.german}');
+      await firebaseRepo.saveOrUpdateVocabulary(voc);
+    }
+    updatedVocabularies.clear();
+    print('_saveUpdatedVocabulariesInDB END');
   }
 
   Future<void> _loadVocabularies() async {
@@ -123,6 +136,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         ),
         QuizPage(
           vocabularies: vocabularies,
+          updatedVocabularies: updatedVocabularies,
           settings: widget.settings,
           onUpdate: _saveVocabularies,
           quizGerman: quizGerman,

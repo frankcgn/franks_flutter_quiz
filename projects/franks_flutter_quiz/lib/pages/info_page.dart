@@ -13,7 +13,7 @@ class InfoPage extends StatefulWidget {
   _InfoPageState createState() => _InfoPageState();
 }
 
-class _InfoPageState extends State<InfoPage> {
+class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
   void _navigateToHome() {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
@@ -24,7 +24,7 @@ class _InfoPageState extends State<InfoPage> {
       ),
     );
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -42,7 +42,7 @@ class _InfoPageState extends State<InfoPage> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Version:\n20250220-001',
+                'Version:\n20250222-001',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Colors.black),
               ),
