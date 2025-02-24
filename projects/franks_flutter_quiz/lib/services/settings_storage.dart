@@ -1,9 +1,11 @@
-// storage.dart
+// settings_storage.dart
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:path_provider/path_provider.dart';
-import '../models/appSettings.dart';
-import '../models/vocabulary.dart';
+
+import '../../models/appSettings.dart';
+import '../../models/vocabulary.dart';
 
 class SettingsStorage {
   static Future<String> get _localPath async {

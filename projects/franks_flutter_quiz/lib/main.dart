@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
 import 'package:flutter/material.dart';
+
 import '../models/appSettings.dart';
-import '../models/vocabulary.dart';
-import 'storage.dart';
+import 'firebase_options.dart';
 import 'pages/info_page.dart';
+import 'services/settings_storage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -1,14 +1,15 @@
 // pages/home_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_test_01/services/database_service.dart';
+
 import '../firebase_repository.dart';
-import '../storage.dart';
-import '../vocabulary_list.dart';
-import 'quiz_page.dart';
-import 'vocabulary_management_page.dart';
-import 'settings_page.dart';
 import '../models/appSettings.dart';
 import '../models/vocabulary.dart';
+import '../services/settings_storage.dart';
+import '../vocabulary_list.dart';
+import 'quiz_page.dart';
+import 'settings_page.dart';
+import 'vocabulary_management_page.dart';
 
 class HomePage extends StatefulWidget {
   final AppSettings settings;
