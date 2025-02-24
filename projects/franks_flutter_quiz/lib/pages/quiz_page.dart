@@ -5,6 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import '../models/appSettings.dart';
 import '../models/vocabulary.dart';
+import '../widgets/action_button.dart';
+import '../widgets/example_text_widget.dart';
+import '../widgets/input_field_container.dart';
+import '../widgets/question_container.dart';
+import '../widgets/speak_buttons_row.dart';
+import '../widgets/status_bar.dart';
+import '../widgets/wrong_answer_container.dart';
+import '../widgets/submitted_answer_container.dart';
+
+enum QuizState { waitingForAnswer, correctAnswer, wrongAnswer }
 
 class QuizPage extends StatefulWidget {
   final List<Vocabulary> vocabularies;
@@ -42,7 +52,7 @@ class _QuizPageState extends State<QuizPage> {
   void initState() {
     super.initState();
     askGerman = widget.quizGerman;
-    _focusNode.requestFocus(); // Optional: Beim Seitenstart den Cursor setzen.
+    _focusNode.requestFocus();
   }
 
   @override
@@ -57,7 +67,6 @@ class _QuizPageState extends State<QuizPage> {
   }
 
   /// Liefert die aktuell anzuzeigende Vokabel.
-  /// Falls activeVocabulary noch nicht gesetzt ist, wird sie anhand der Gruppierung ermittelt.
   Vocabulary? get currentVocabulary {
     if (activeVocabulary != null) return activeVocabulary;
     if (widget.vocabularies.isEmpty) return null;
@@ -71,6 +80,9 @@ class _QuizPageState extends State<QuizPage> {
     final List<Vocabulary> lowestGroup = groups[sortedKeys.first]!;
     lowestGroup.shuffle(Random());
     activeVocabulary = lowestGroup.first;
+    if(widget.updatedVocabularies.length > 5) {
+      // Hier könnte ein Speichern in die DB erfolgen.
+    }
     widget.updatedVocabularies.add(activeVocabulary!);
     return activeVocabulary;
   }
@@ -100,19 +112,24 @@ class _QuizPageState extends State<QuizPage> {
   }
 
   bool _isDueHelper(DateTime? lastQuery, int intervalDays, DateTime today) =>
-      lastQuery == null || !lastQuery.add(Duration(days: intervalDays)).isAfter(today);
+      lastQuery == null ||
+          !lastQuery.add(Duration(days: intervalDays)).isAfter(today);
 
   bool isDue(Vocabulary voc, bool askGerman, AppSettings settings) {
     final DateTime today = DateTime.now();
     if (askGerman) {
       if (voc.deToEnCounter < 3) return true;
-      if (voc.deToEnCounter == 3) return _isDueHelper(voc.deToEnLastQuery, settings.intervalFor3, today);
-      if (voc.deToEnCounter == 4) return _isDueHelper(voc.deToEnLastQuery, settings.intervalFor4, today);
+      if (voc.deToEnCounter == 3)
+        return _isDueHelper(voc.deToEnLastQuery, settings.intervalFor3, today);
+      if (voc.deToEnCounter == 4)
+        return _isDueHelper(voc.deToEnLastQuery, settings.intervalFor4, today);
       return _isDueHelper(voc.deToEnLastQuery, settings.intervalFor5, today);
     } else {
       if (voc.enToDeCounter < 3) return true;
-      if (voc.enToDeCounter == 3) return _isDueHelper(voc.enToDeLastQuery, settings.intervalFor3, today);
-      if (voc.enToDeCounter == 4) return _isDueHelper(voc.enToDeLastQuery, settings.intervalFor4, today);
+      if (voc.enToDeCounter == 3)
+        return _isDueHelper(voc.enToDeLastQuery, settings.intervalFor3, today);
+      if (voc.enToDeCounter == 4)
+        return _isDueHelper(voc.enToDeLastQuery, settings.intervalFor4, today);
       return _isDueHelper(voc.enToDeLastQuery, settings.intervalFor5, today);
     }
   }
@@ -133,8 +150,7 @@ class _QuizPageState extends State<QuizPage> {
     await flutterTts.speak(voc.englishSentence);
   }
 
-  /// Prüft die Antwort auf Basis der aktuell festgelegten Vokabel.
-  /// Unterstützt mehrere korrekte Lösungen (durch Komma getrennt).
+  /// Prüft die Antwort anhand der aktuellen Vokabel.
   void _handleAnswer() {
     final Vocabulary? voc = currentVocabulary;
     if (voc == null) return;
@@ -187,179 +203,21 @@ class _QuizPageState extends State<QuizPage> {
         ? (askGerman ? 'kein text vorhanden' : 'no text available')
         : rawExampleText;
     final TextStyle exampleStyle = noExample
-        ? Theme.of(context).textTheme.bodyLarge!.copyWith(fontStyle: FontStyle.italic)
+        ? Theme.of(context)
+        .textTheme
+        .bodyLarge!
+        .copyWith(fontStyle: FontStyle.italic)
         : Theme.of(context).textTheme.bodyLarge!;
     final String expectedAnswer = askGerman ? currentVoc.english : currentVoc.german;
     const double containerHeight = 60.0;
-
-    // Darkmode prüfen
     final bool darkMode = widget.settings.darkMode;
-
-    // Fragecontainer mit AutoSizeText
-    final Widget questionContainer = Container(
-      height: containerHeight,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey, width: 3),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      alignment: Alignment.center,
-      child: AutoSizeText(
-        questionText,
-        style: Theme.of(context).textTheme.headlineSmall,
-        maxLines: 1,
-        textAlign: TextAlign.center,
-      ),
-    );
-
     final Color inputBorderColor = quizState == QuizState.correctAnswer
         ? Colors.green
         : quizState == QuizState.wrongAnswer
         ? Colors.red
         : Colors.grey;
-
     final Map<String, int> stats = _computeStats();
 
-    // Statusbar mit Querstrichen zwischen den Einträgen.
-    final List<Widget> statusWidgets = [];
-    final List<String> statusTexts = [
-      'Alle: ${stats['total']}',
-      '0: ${stats['0']}',
-      '1-2: ${stats['1-2']}',
-      '3-4: ${stats['3-4']}',
-      '>4: ${stats['>4']}'
-    ];
-    for (int i = 0; i < statusTexts.length; i++) {
-      statusWidgets.add(Text(
-        statusTexts[i],
-        style: TextStyle(color: darkMode ? Colors.white : Colors.black),
-      ));
-      if (i < statusTexts.length - 1) {
-        statusWidgets.add(Text(
-          ' | ',
-          style: TextStyle(color: darkMode ? Colors.white : Colors.black),
-        ));
-      }
-    }
-    final Widget statusBar = Container(
-      padding: const EdgeInsets.all(8.0),
-      decoration: BoxDecoration(
-        color: darkMode ? Colors.black : Colors.grey[200],
-        border: darkMode ? Border.all(color: Colors.grey) : null,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: statusWidgets,
-      ),
-    );
-
-    // Eingabefeld in einem Container mit Rahmen
-    final Widget inputFieldContainer = Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: inputBorderColor, width: 3),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: TextField(
-        enabled: _inputEnabled,
-        focusNode: _focusNode,
-        autocorrect: false,
-        enableSuggestions: false,
-        textCapitalization: TextCapitalization.none,
-        controller: answerController,
-        textAlign: TextAlign.center,
-        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-          color: showExample
-              ? (quizState == QuizState.correctAnswer ? Colors.green : Colors.red)
-              : Colors.black,
-        ),
-        decoration: const InputDecoration(
-          hintText: 'Deine Antwort',
-          contentPadding: EdgeInsets.all(12),
-          border: InputBorder.none,
-        ),
-        textInputAction: TextInputAction.done,
-        onSubmitted: (value) {
-          if (!_inputEnabled) return;
-          _handleAnswer();
-        },
-      ),
-    );
-
-    // Container für die eingetragene Antwort wird nur angezeigt, wenn die Antwort korrekt ist.
-    final Widget submittedAnswerContainer = (showExample && quizState == QuizState.correctAnswer)
-        ? Padding(
-      padding: const EdgeInsets.only(top: 8.0),
-      child: Container(
-        height: containerHeight,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          border: Border.all(color: inputBorderColor, width: 3),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        alignment: Alignment.center,
-        child: AutoSizeText(
-          answerController.text,
-          style: Theme.of(context)
-              .textTheme
-              .headlineSmall
-              ?.copyWith(color: inputBorderColor),
-          textAlign: TextAlign.center,
-        ),
-      ),
-    )
-        : const SizedBox();
-
-    // Action-Button: Zeigt "Antwort überprüfen" oder "Nächste Vokabel" an.
-    final double? fontSize = Theme.of(context).textTheme.headlineSmall?.fontSize;
-    final Widget actionButton = SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: showExample ? _nextQuestion : _handleAnswer,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue,
-          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-          minimumSize: Size(double.infinity, containerHeight),
-        ),
-        child: Text(
-          showExample ? 'Nächste Vokabel' : 'Antwort überprüfen',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontSize: fontSize, color: Colors.white),
-        ),
-      ),
-    );
-
-    // Lautsprechersymbol-Buttons in einer Zeile: Linker Button für die Vokabel, rechter für den Beispielsatz.
-    final Widget speakButtonsRow = showExample
-        ? Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.volume_up),
-              onPressed: _speakEnglish,
-              tooltip: 'Sprich die Vokabel aus',
-            ),
-            const Text("Vokabel"),
-          ],
-        ),
-        const SizedBox(width: 16),
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.volume_up),
-              onPressed: _speakEnglishSentence,
-              tooltip: 'Sprich den Beispielsatz aus',
-            ),
-            const Text("Beispielsatz"),
-          ],
-        ),
-      ],
-    )
-        : const SizedBox();
-
-    // Gesamtlayout: Oberer (scrollbarer) Bereich und fixierter Action-Button am unteren Rand.
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       child: Padding(
@@ -376,46 +234,46 @@ class _QuizPageState extends State<QuizPage> {
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
                         children: [
-                          statusBar,
+                          StatusBar(stats: stats, darkMode: darkMode),
                           const SizedBox(height: 8),
                           Row(
                             children: [
-                              Expanded(child: questionContainer),
+                              Expanded(child: QuestionContainer(questionText: questionText)),
                             ],
                           ),
                           const SizedBox(height: 12),
-                          const Text(
-                            'Beispielsatz:',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 16),
-                          ),
-                          const SizedBox(height: 4),
-                          AutoSizeText(
-                            exampleText,
-                            style: exampleStyle,
-                            textAlign: TextAlign.center,
+                          ExampleTextWidget(
+                            exampleText: exampleText,
+                            textStyle: exampleStyle,
+                            isEmptyExample: noExample,
+                            askGerman: askGerman,
                           ),
                           const SizedBox(height: 20),
-                          inputFieldContainer,
-                          submittedAnswerContainer,
-                          if (showExample && quizState == QuizState.wrongAnswer)
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Container(
-                                height: containerHeight,
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.blue, width: 3),
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                alignment: Alignment.center,
-                                child: AutoSizeText(
-                                  expectedAnswer,
-                                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Colors.blue),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
+                          InputFieldContainer(
+                            controller: answerController,
+                            focusNode: _focusNode,
+                            enabled: _inputEnabled,
+                            borderColor: inputBorderColor,
+                            onSubmitted: (value) {
+                              if (!_inputEnabled) {
+                                _nextQuestion();
+                              } else {
+                                _handleAnswer();
+                              }
+                            },
+                            textStyle: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                              color: showExample
+                                  ? (quizState == QuizState.correctAnswer ? Colors.green : Colors.red)
+                                  : Colors.black,
                             ),
+                          ),
+                          if (showExample && quizState == QuizState.correctAnswer)
+                            SubmittedAnswerContainer(
+                              answerText: answerController.text,
+                              borderColor: inputBorderColor,
+                            ),
+                          if (showExample && quizState == QuizState.wrongAnswer)
+                            WrongAnswerContainer(expectedAnswer: expectedAnswer),
                           if (showExample)
                             Padding(
                               padding: const EdgeInsets.all(8.0),
@@ -427,16 +285,22 @@ class _QuizPageState extends State<QuizPage> {
                                 textAlign: TextAlign.center,
                               ),
                             ),
-                          if (showExample) speakButtonsRow,
+                          if (showExample)
+                            SpeakButtonsRow(
+                              onSpeakVocabulary: _speakEnglish,
+                              onSpeakSentence: _speakEnglishSentence,
+                            ),
                         ],
                       ),
                     ),
                   ),
-                  // Fixierter Action-Button am unteren Rand.
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(16.0),
-                    child: actionButton,
+                    child: ActionButton(
+                      text: showExample ? 'Nächste Vokabel' : 'Antwort überprüfen',
+                      onPressed: showExample ? _nextQuestion : _handleAnswer,
+                    ),
                   ),
                 ],
               );

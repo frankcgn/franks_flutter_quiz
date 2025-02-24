@@ -7,6 +7,7 @@ class FirebaseRepository {
 
   Future<void> saveOrUpdateVocabulary(Vocabulary voc) async {
     try {
+      print('saveOrUpdateVocabulary ${voc.german}');
       // Verwende die UUID als Dokument-ID
       final DocumentReference docRef = _collection.doc(voc.uuid);
       final DocumentSnapshot docSnapshot = await docRef.get();
