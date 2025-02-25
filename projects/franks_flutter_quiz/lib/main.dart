@@ -12,9 +12,20 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  // Firestore offline persistenz aktivieren
   FirebaseFirestore.instance.settings = const Settings(
-    persistenceEnabled: true  // cache data on device
+    persistenceEnabled: true,
+    cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
   );
+
+  // Globaler Snapshot-Listener für die Collection "vocabularies"
+  FirebaseFirestore.instance
+      .collection('vocabularies')
+      .snapshots()
+      .listen((snapshot) {
+    print("Snapshot updated: ${snapshot.docs.length} Dokumente");
+    // Hier kannst du weitere Logik einbauen, z.B. Datenverarbeitung oder globales State-Management.
+  });
   runApp(MyApp());
 }
 

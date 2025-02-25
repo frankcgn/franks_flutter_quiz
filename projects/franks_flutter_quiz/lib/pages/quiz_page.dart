@@ -1,8 +1,10 @@
 // pages/quiz_page.dart
 import 'dart:math';
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+
 import '../models/appSettings.dart';
 import '../models/vocabulary.dart';
 import '../widgets/action_button.dart';
@@ -11,21 +13,21 @@ import '../widgets/input_field_container.dart';
 import '../widgets/question_container.dart';
 import '../widgets/speak_buttons_row.dart';
 import '../widgets/status_bar.dart';
-import '../widgets/wrong_answer_container.dart';
 import '../widgets/submitted_answer_container.dart';
+import '../widgets/wrong_answer_container.dart';
+
+typedef VocabularyCallback = void Function(Vocabulary voc);
 
 enum QuizState { waitingForAnswer, correctAnswer, wrongAnswer }
 
 class QuizPage extends StatefulWidget {
   final List<Vocabulary> vocabularies;
-  List<Vocabulary> updatedVocabularies;
   final AppSettings settings;
-  final VoidCallback onUpdate;
+  final VocabularyCallback onUpdate;
   final bool quizGerman;
 
   QuizPage({
     required this.vocabularies,
-    required this.updatedVocabularies,
     required this.settings,
     required this.onUpdate,
     required this.quizGerman,
@@ -36,6 +38,7 @@ class QuizPage extends StatefulWidget {
 }
 
 class _QuizPageState extends State<QuizPage> {
+  List<Vocabulary>? vocabularies;
   int currentIndex = 0;
   final TextEditingController answerController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
@@ -80,10 +83,6 @@ class _QuizPageState extends State<QuizPage> {
     final List<Vocabulary> lowestGroup = groups[sortedKeys.first]!;
     lowestGroup.shuffle(Random());
     activeVocabulary = lowestGroup.first;
-    if(widget.updatedVocabularies.length > 5) {
-      // Hier könnte ein Speichern in die DB erfolgen.
-    }
-    widget.updatedVocabularies.add(activeVocabulary!);
     return activeVocabulary;
   }
 
@@ -174,6 +173,7 @@ class _QuizPageState extends State<QuizPage> {
       showExample = true;
       _inputEnabled = false;
     });
+    widget.onUpdate(voc);
   }
 
   /// Setzt activeVocabulary zurück, sodass beim nächsten Zugriff eine neue Vokabel gewählt wird.

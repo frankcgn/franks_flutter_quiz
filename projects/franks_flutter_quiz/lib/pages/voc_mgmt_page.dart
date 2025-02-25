@@ -1,11 +1,21 @@
-// vocabulary_management_page.dart
+// voc_mgmt_page.dart
 import 'package:flutter/material.dart';
+
 import '../models/vocabulary.dart';
+
+typedef VocabularyCallback = void Function(Vocabulary voc);
 
 class VocabularyManagementPage extends StatefulWidget {
   final List<Vocabulary> vocabularies;
-  final VoidCallback onUpdate;
-  VocabularyManagementPage({required this.vocabularies, required this.onUpdate});
+  final VocabularyCallback onInsert;
+  final VocabularyCallback onUpdate;
+  final VocabularyCallback onDelete;
+
+  VocabularyManagementPage(
+      {required this.vocabularies,
+      required this.onInsert,
+      required this.onUpdate,
+      required this.onDelete});
 
   @override
   _VocabularyManagementPageState createState() => _VocabularyManagementPageState();
@@ -17,6 +27,7 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
   String _english = '';
   String _englishSentence = '';
   String _germanSentence = '';
+  String _group = '';
   String _searchQuery = '';
 
   void _showAddDialog() {
@@ -86,9 +97,7 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
                       labelText: 'Gruppe (optional)',
                       border: OutlineInputBorder(),
                     ),
-                    onSaved: (value) {
-                      // Hier kannst Du den Gruppennamen übernehmen.
-                    },
+                    onSaved: (value) => _group = value!,
                   ),
                 ],
               ),
@@ -101,15 +110,17 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
                   _formKey.currentState!.save();
+                  Vocabulary voc = Vocabulary(
+                    german: _german,
+                    english: _english,
+                    englishSentence: _englishSentence,
+                    germanSentence: _germanSentence,
+                    group: _group,
+                  );
                   setState(() {
-                    widget.vocabularies.add(Vocabulary(
-                      german: _german,
-                      english: _english,
-                      englishSentence: _englishSentence,
-                      germanSentence: _germanSentence,
-                    ));
+                    widget.vocabularies.add(voc);
                   });
-                  widget.onUpdate();
+                  widget.onInsert(voc);
                   Navigator.of(context).pop();
                 }
               },
@@ -224,7 +235,7 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
                       group: editedGroup,
                     );
                   });
-                  widget.onUpdate();
+                  widget.onUpdate(voc);
                   Navigator.of(context).pop();
                 }
               },
@@ -236,10 +247,9 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
   }
 
   void _deleteVocabulary(int index) {
-    setState(() {
-      widget.vocabularies.removeAt(index);
-    });
-    widget.onUpdate();
+    Vocabulary voc = widget.vocabularies[index];
+    widget.onDelete(voc);
+    widget.vocabularies.removeAt(index);
   }
 
   @override

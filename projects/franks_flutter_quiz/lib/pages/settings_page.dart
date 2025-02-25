@@ -1,21 +1,14 @@
 // pages/settings_page.dart
 import 'package:flutter/material.dart';
+
 import '../models/appSettings.dart';
-import '../models/vocabulary.dart';
-import '../firebase_repository.dart';
 
 class SettingsPage extends StatefulWidget {
   final AppSettings settings;
   final Function(AppSettings) onSettingsChanged;
-  final Function(String) onSaveVocabularyList;
-  final Future<void> Function(String) onLoadVocabularyList;
-  final List<Vocabulary> vocabularies; // Übergebe die Vokabelliste hier
   SettingsPage({
     required this.settings,
     required this.onSettingsChanged,
-    required this.onSaveVocabularyList,
-    required this.onLoadVocabularyList,
-    required this.vocabularies,
   });
 
   @override
@@ -27,16 +20,6 @@ class _SettingsPageState extends State<SettingsPage> {
   late TextEditingController interval3Controller;
   late TextEditingController interval4Controller;
   late TextEditingController interval5Controller;
-  final FirebaseRepository firebaseRepo = FirebaseRepository();
-
-  Future<void> _saveAllVocabularies() async {
-    for (Vocabulary voc in widget.vocabularies) {
-      await firebaseRepo.saveOrUpdateVocabulary(voc);
-    }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Alle Vokabeln wurden in die Datenbank gespeichert.')),
-    );
-  }
 
   @override
   void initState() {
@@ -69,72 +52,6 @@ class _SettingsPageState extends State<SettingsPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Einstellungen gespeichert.')),
     );
-  }
-
-  Future<void> _showSaveDialog() async {
-    String fileName = "";
-    await showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Vokabelliste speichern'),
-          content: TextField(
-            decoration: const InputDecoration(
-              labelText: 'Dateiname (ohne .json)',
-              border: OutlineInputBorder(),
-            ),
-            onChanged: (value) {
-              fileName = value;
-            },
-          ),
-          actions: [
-            TextButton(child: const Text('Abbrechen'), onPressed: () => Navigator.of(context).pop(),),
-            ElevatedButton(
-              child: const Text('Speichern'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-    if (fileName.isNotEmpty) {
-      widget.onSaveVocabularyList(fileName);
-    }
-  }
-
-  Future<void> _showLoadDialog() async {
-    String fileName = "";
-    await showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Vokabelliste laden'),
-          content: TextField(
-            decoration: const InputDecoration(
-              labelText: 'Dateiname (ohne .json)',
-              border: OutlineInputBorder(),
-            ),
-            onChanged: (value) {
-              fileName = value;
-            },
-          ),
-          actions: [
-            TextButton(child: const Text('Abbrechen'), onPressed: () => Navigator.of(context).pop(),),
-            ElevatedButton(
-              child: const Text('Laden'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-    if (fileName.isNotEmpty) {
-      await widget.onLoadVocabularyList(fileName);
-    }
   }
 
   @override
@@ -178,11 +95,6 @@ class _SettingsPageState extends State<SettingsPage> {
           ElevatedButton(
             onPressed: _saveSettings,
             child: const Text('Einstellungen speichern'),
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: _saveAllVocabularies,
-            child: Text('Alle Vokabeln in Firebase speichern'),
           ),
         ],
       ),

@@ -2,14 +2,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test_01/services/database_service.dart';
 
-import '../firebase_repository.dart';
 import '../models/appSettings.dart';
 import '../models/vocabulary.dart';
-import '../services/settings_storage.dart';
-import '../vocabulary_list.dart';
 import 'quiz_page.dart';
 import 'settings_page.dart';
-import 'vocabulary_management_page.dart';
+import 'voc_mgmt_page.dart';
 
 class HomePage extends StatefulWidget {
   final AppSettings settings;
@@ -21,16 +18,14 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
-  final DatabaseService _databaseService = DatabaseService();
   int _selectedIndex = 1;
   List<Vocabulary> vocabularies = [];
-  List<Vocabulary> updatedVocabularies = [];
   bool quizGerman = true; // true: Deutsch→Englisch, false: Englisch→Deutsch
 
   @override
   void initState() {
     super.initState();
-    _loadVocabulariesFromDB();
+    _loadAllVocabulariesFromFirebase();
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -39,81 +34,16 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     // Wenn die App in den Hintergrund wechselt oder pausiert, speichere alle Änderungen
     if (state == AppLifecycleState.paused || state == AppLifecycleState.detached) {
       // Hier rufst du deine Funktion zum Speichern der Vokabeln auf.
-      _saveUpdatedVocabulariesInDB();
     }
   }
 
-  Future<void> _loadVocabulariesFromDB() async {
-    print('_loadVocabulariesFromDB BEGIN');
-    final List<Vocabulary> loadedVocab = await initialVocabularyFromDB();
-    setState(() {
-      vocabularies = loadedVocab;
-      print('_loadVocabulariesFromDB COUNT: ${vocabularies.length}');
-    });
-    print('_loadVocabulariesFromDB END');
+  Future? _loadAllVocabulariesFromFirebase() async {
+    print('_loadAllVocabulariesFromFirebase BEGIN');
+    vocabularies = await DatabaseService().getCompleteVocabularies();
+    print('_loadAllVocabulariesFromFirebase: ${vocabularies.length} - END');
   }
 
-  Future<void> _saveAllVocabulariesInDB() async {
-    print('_saveAllVocabulariesInDB BEGIN');
-    final FirebaseRepository firebaseRepo = FirebaseRepository();
-
-    for (Vocabulary voc in vocabularies) {
-      print('${voc.german}');
-      await firebaseRepo.saveOrUpdateVocabulary(voc);
-    }
-    print('_saveAllVocabulariesInDB END');
-  }
-
-  Future<void> _saveUpdatedVocabulariesInDB() async {
-    print('_saveUpdatedVocabulariesInDB BEGIN');
-    final FirebaseRepository firebaseRepo = FirebaseRepository();
-
-    for (Vocabulary voc in updatedVocabularies) {
-      print('${voc.german}');
-      await firebaseRepo.saveOrUpdateVocabulary(voc);
-    }
-    updatedVocabularies.clear();
-    print('_saveUpdatedVocabulariesInDB END');
-  }
-
-  Future<void> _loadVocabularies() async {
-    final List<Vocabulary> loadedVocab = await VocabularyStorage.loadVocabularies();
-    if (loadedVocab.isEmpty) {
-      final List<Vocabulary> initialVocabs = await initialVocabulary();
-      loadedVocab.addAll(initialVocabs);
-      await VocabularyStorage.saveVocabularies(loadedVocab);
-    }
-    setState(() {
-      vocabularies = loadedVocab;
-    });
-  }
-
-  Future<void> _saveVocabularies() async {
-    await VocabularyStorage.saveVocabularies(vocabularies);
-  }
-
-  void _saveVocabularyList(String fileName) async {
-    await VocabularyStorage.saveVocabulariesWithName(vocabularies, fileName);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Vokabelliste gespeichert')),
-    );
-  }
-
-  Future<void> _loadVocabularyList(String fileName) async {
-    final List<Vocabulary> loaded = await VocabularyStorage.loadVocabulariesWithName(fileName);
-    if (loaded.isNotEmpty) {
-      setState(() {
-        vocabularies = loaded;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vokabelliste geladen')),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Keine Vokabelliste unter diesem Namen gefunden')),
-      );
-    }
-  }
+  Future<void> _doNothing() async {}
 
   void _onItemTapped(int index) {
     setState(() {
@@ -130,30 +60,51 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   List<Widget> _pages() => [
         VocabularyManagementPage(
           vocabularies: vocabularies,
-          onUpdate: () {
-            _saveVocabularies();
+          onInsert: (Vocabulary newVoc) {
+            // Beispiel: Ein neues Vocabulary einfügen
+            DatabaseService().addVocabulary(newVoc);
+            setState(() {});
+          },
+          onUpdate: (Vocabulary updateVoc) {
+            // Beispiel: Eine vorhandene Vocabulary ändern
+            DatabaseService().updateVocabulary(updateVoc.uuid, updateVoc);
+            setState(() {});
+          },
+          onDelete: (Vocabulary delVoc) {
+            // Beispiel: Eine vorhandene Vocabulary löschen
+            DatabaseService().deleteVocabulary(delVoc.uuid);
             setState(() {});
           },
         ),
         QuizPage(
           vocabularies: vocabularies,
-          updatedVocabularies: updatedVocabularies,
           settings: widget.settings,
-          onUpdate: _saveVocabularies,
+          onUpdate: (Vocabulary updateVoc) {
+            // Beispiel: Eine vorhandene Vocabulary ändern
+            DatabaseService().updateVocabulary(updateVoc.uuid, updateVoc);
+          },
           quizGerman: quizGerman,
         ),
         SettingsPage(
           settings: widget.settings,
           onSettingsChanged: widget.onSettingsChanged,
-          onSaveVocabularyList: _saveVocabularyList,
-          onLoadVocabularyList: _loadVocabularyList,
-          vocabularies: vocabularies,
         ),
       ];
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return FutureBuilder<List<Vocabulary>>(
+      future: DatabaseService().getCompleteVocabularies(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Fehler beim Laden: ${snapshot.error}'));
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Center(child: Text('Keine Vokabeln gefunden'));
+        } else {
+          vocabularies = snapshot.data!;
+          return Scaffold(
       appBar: AppBar(title: const Text('Vokabel Trainer')),
       body: _pages()[_selectedIndex],
       bottomNavigationBar: NavigationBar(
@@ -165,6 +116,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           const NavigationDestination(icon: Icon(Icons.settings), label: 'Einstellungen'),
         ],
       ),
+    );
+  }
+      },
     );
   }
 }
