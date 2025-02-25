@@ -51,6 +51,9 @@ class _QuizPageState extends State<QuizPage> {
   // Speichert die aktuell geprüfte Vokabel, damit diese konstant bleibt.
   Vocabulary? activeVocabulary;
 
+  // Neuer Filtermode: 0 = alle, 1 = 0 richtige, 2 = 1 oder 2 richtige, 3 = 3 oder 4 richtige, 4 = mehr als 4 richtige
+  int filterMode = 0;
+
   @override
   void initState() {
     super.initState();
@@ -69,12 +72,33 @@ class _QuizPageState extends State<QuizPage> {
     }
   }
 
-  /// Liefert die aktuell anzuzeigende Vokabel.
+  /// Liefert die gefilterte Liste der Vokabeln basierend auf dem aktuellen Filtermode.
+  List<Vocabulary> get filteredVocabularies {
+    return widget.vocabularies.where((voc) {
+      final int counter = askGerman ? voc.deToEnCounter : voc.enToDeCounter;
+      switch (filterMode) {
+        case 0: // Alle Vokabeln
+          return true;
+        case 1: // Nur Vokabeln mit 0 richtigen Antworten
+          return counter == 0;
+        case 2: // Nur Vokabeln mit 1 oder 2 richtigen Antworten
+          return counter == 1 || counter == 2;
+        case 3: // Nur Vokabeln mit 3 oder 4 richtigen Antworten
+          return counter == 3 || counter == 4;
+        case 4: // Nur Vokabeln mit mehr als 4 richtigen Antworten
+          return counter > 4;
+        default:
+          return true;
+      }
+    }).toList();
+  }
+
+  /// Liefert die aktuell anzuzeigende Vokabel aus der gefilterten Liste.
   Vocabulary? get currentVocabulary {
     if (activeVocabulary != null) return activeVocabulary;
-    if (widget.vocabularies.isEmpty) return null;
+    if (filteredVocabularies.isEmpty) return null;
     final Map<int, List<Vocabulary>> groups = {};
-    for (var voc in widget.vocabularies) {
+    for (var voc in filteredVocabularies) {
       final int counter = askGerman ? voc.deToEnCounter : voc.enToDeCounter;
       groups.putIfAbsent(counter, () => []).add(voc);
     }
@@ -192,7 +216,7 @@ class _QuizPageState extends State<QuizPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.vocabularies.isEmpty || currentVocabulary == null) {
+    if (filteredVocabularies.isEmpty || currentVocabulary == null) {
       return const Center(child: Text('Keine fälligen Vokabeln vorhanden.'));
     }
     final Vocabulary currentVoc = currentVocabulary!;
@@ -234,7 +258,18 @@ class _QuizPageState extends State<QuizPage> {
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
                         children: [
-                          StatusBar(stats: stats, darkMode: darkMode),
+                          // Übergabe des neuen onFilterSelected-Callbacks an die StatusBar:
+                          StatusBar(
+                            stats: stats,
+                            darkMode: darkMode,
+                            onFilterSelected: (int index) {
+                              setState(() {
+                                filterMode = index;
+                                activeVocabulary =
+                                    null; // Reset der aktuellen Vokabel, damit beim Filterwechsel neu gewählt wird.
+                              });
+                            },
+                          ),
                           const SizedBox(height: 8),
                           Row(
                             children: [
