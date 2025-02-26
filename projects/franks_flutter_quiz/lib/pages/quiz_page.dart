@@ -37,7 +37,7 @@ class QuizPage extends StatefulWidget {
   _QuizPageState createState() => _QuizPageState();
 }
 
-class _QuizPageState extends State<QuizPage> {
+class _QuizPageState extends State<QuizPage> with RestorationMixin {
   List<Vocabulary>? vocabularies;
   int currentIndex = 0;
   final TextEditingController answerController = TextEditingController();
@@ -51,8 +51,16 @@ class _QuizPageState extends State<QuizPage> {
   // Speichert die aktuell geprüfte Vokabel, damit diese konstant bleibt.
   Vocabulary? activeVocabulary;
 
-  // Neuer Filtermode: 0 = alle, 1 = 0 richtige, 2 = 1 oder 2 richtige, 3 = 3 oder 4 richtige, 4 = mehr als 4 richtige
-  int filterMode = 0;
+  // Neuer Filtermode, der mithilfe von RestorableInt persistiert wird.
+  final RestorableInt _filterMode = RestorableInt(0);
+
+  @override
+  String? get restorationId => 'quiz_page';
+
+  @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    registerForRestoration(_filterMode, 'filter_mode');
+  }
 
   @override
   void initState() {
@@ -72,11 +80,16 @@ class _QuizPageState extends State<QuizPage> {
     }
   }
 
+  /// Hilfsmethode, die Klammern und deren Inhalt aus einem String entfernt.
+  String normalizeAnswer(String s) {
+    return s.replaceAll(RegExp(r'\([^)]*\)'), '').trim();
+  }
+
   /// Liefert die gefilterte Liste der Vokabeln basierend auf dem aktuellen Filtermode.
   List<Vocabulary> get filteredVocabularies {
     return widget.vocabularies.where((voc) {
       final int counter = askGerman ? voc.deToEnCounter : voc.enToDeCounter;
-      switch (filterMode) {
+      switch (_filterMode.value) {
         case 0: // Alle Vokabeln
           return true;
         case 1: // Nur Vokabeln mit 0 richtigen Antworten
@@ -178,19 +191,33 @@ class _QuizPageState extends State<QuizPage> {
     final Vocabulary? voc = currentVocabulary;
     if (voc == null) return;
     final String givenAnswer = answerController.text.trim().toLowerCase();
+    // Erwartete Antwort wird abhängig von der Abfragerichtung gewählt.
     final String expectedAnswer = askGerman ? voc.english : voc.german;
+    // Bereinige beide Strings, indem Klammer-Inhalte entfernt werden.
+    final String normalizedGiven = normalizeAnswer(givenAnswer).toLowerCase();
     final List<String> validAnswers = expectedAnswer
         .split(',')
-        .map((s) => s.trim().toLowerCase())
+        .map((s) => normalizeAnswer(s).toLowerCase())
         .where((s) => s.isNotEmpty)
         .toList();
-    final bool correct = validAnswers.contains(givenAnswer);
+    final bool correct = validAnswers.contains(normalizedGiven);
     setState(() {
+      voc.answerCount++;
       if (askGerman) {
-        voc.deToEnCounter = correct ? voc.deToEnCounter + 1 : 0;
+        if (correct) {
+          voc.deToEnCounter = voc.deToEnCounter + 1;
+        } else {
+          // Verringere den Zähler bei falscher Antwort, aber nicht unter 0.
+          voc.deToEnCounter = max(voc.deToEnCounter - 1, 0);
+        }
         voc.deToEnLastQuery = DateTime.now();
       } else {
-        voc.enToDeCounter = correct ? voc.enToDeCounter + 1 : 0;
+        if (correct) {
+          voc.enToDeCounter = voc.enToDeCounter + 1;
+        } else {
+          // Verringere den Zähler bei falscher Antwort, aber nicht unter 0.
+          voc.enToDeCounter = max(voc.enToDeCounter - 1, 0);
+        }
         voc.enToDeLastQuery = DateTime.now();
       }
       quizState = correct ? QuizState.correctAnswer : QuizState.wrongAnswer;
@@ -220,8 +247,10 @@ class _QuizPageState extends State<QuizPage> {
       return const Center(child: Text('Keine fälligen Vokabeln vorhanden.'));
     }
     final Vocabulary currentVoc = currentVocabulary!;
-    final String questionText = askGerman ? currentVoc.german : currentVoc.english;
-    final String rawExampleText = askGerman ? currentVoc.germanSentence : currentVoc.englishSentence;
+    final String questionText =
+        askGerman ? currentVoc.german : currentVoc.english;
+    final String rawExampleText =
+        askGerman ? currentVoc.germanSentence : currentVoc.englishSentence;
     final bool noExample = rawExampleText.trim().isEmpty;
     final String exampleText = noExample
         ? (askGerman ? 'kein text vorhanden' : 'no text available')
@@ -232,7 +261,8 @@ class _QuizPageState extends State<QuizPage> {
         .bodyLarge!
         .copyWith(fontStyle: FontStyle.italic)
         : Theme.of(context).textTheme.bodyLarge!;
-    final String expectedAnswer = askGerman ? currentVoc.english : currentVoc.german;
+    final String expectedAnswer =
+        askGerman ? currentVoc.english : currentVoc.german;
     const double containerHeight = 60.0;
     final bool darkMode = widget.settings.darkMode;
     final Color inputBorderColor = quizState == QuizState.correctAnswer
@@ -248,7 +278,8 @@ class _QuizPageState extends State<QuizPage> {
         padding: const EdgeInsets.all(16.0),
         child: Card(
           elevation: 4,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           child: LayoutBuilder(
             builder: (context, constraints) {
               return Column(
@@ -258,22 +289,32 @@ class _QuizPageState extends State<QuizPage> {
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
                         children: [
-                          // Übergabe des neuen onFilterSelected-Callbacks an die StatusBar:
+                          // Übergabe des aktuellen Filterwerts an die StatusBar:
                           StatusBar(
                             stats: stats,
                             darkMode: darkMode,
+                            selectedFilterIndex: _filterMode.value,
                             onFilterSelected: (int index) {
                               setState(() {
-                                filterMode = index;
+                                _filterMode.value = index;
                                 activeVocabulary =
-                                    null; // Reset der aktuellen Vokabel, damit beim Filterwechsel neu gewählt wird.
+                                    null; // Beim Filterwechsel neu auswählen.
                               });
                             },
                           ),
                           const SizedBox(height: 8),
+                          // Anzeige der Abfrage-Statistiken für die aktuelle Vokabel:
+                          Text(
+                            'Abgefragt: ${currentVoc.answerCount}    Richtig: ${askGerman ? currentVoc.deToEnCounter : currentVoc.enToDeCounter}',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
                           Row(
                             children: [
-                              Expanded(child: QuestionContainer(questionText: questionText)),
+                              Expanded(
+                                  child: QuestionContainer(
+                                      questionText: questionText)),
                             ],
                           ),
                           const SizedBox(height: 12),
@@ -296,10 +337,15 @@ class _QuizPageState extends State<QuizPage> {
                                 _handleAnswer();
                               }
                             },
-                            textStyle: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              color: showExample
-                                  ? (quizState == QuizState.correctAnswer ? Colors.green : Colors.red)
-                                  : Colors.black,
+                            textStyle: Theme.of(context)
+                                .textTheme
+                                .headlineSmall
+                                ?.copyWith(
+                                  color: showExample
+                                      ? (quizState == QuizState.correctAnswer
+                                          ? Colors.green
+                                          : Colors.red)
+                                      : Colors.black,
                             ),
                           ),
                           if (showExample && quizState == QuizState.correctAnswer)
@@ -314,8 +360,15 @@ class _QuizPageState extends State<QuizPage> {
                               padding: const EdgeInsets.all(8.0),
                               child: AutoSizeText(
                                 'Beispielsatz (${askGerman ? "Englisch" : "Deutsch"}):\n${(askGerman ? currentVoc.englishSentence : currentVoc.germanSentence).trim().isEmpty ? (askGerman ? "no text available" : "kein text vorhanden") : (askGerman ? currentVoc.englishSentence : currentVoc.germanSentence)}',
-                                style: ((askGerman ? currentVoc.englishSentence : currentVoc.germanSentence).trim().isEmpty)
-                                    ? Theme.of(context).textTheme.bodyLarge!.copyWith(fontStyle: FontStyle.italic)
+                                style: ((askGerman
+                                            ? currentVoc.englishSentence
+                                            : currentVoc.germanSentence)
+                                        .trim()
+                                        .isEmpty)
+                                    ? Theme.of(context)
+                                        .textTheme
+                                        .bodyLarge!
+                                        .copyWith(fontStyle: FontStyle.italic)
                                     : Theme.of(context).textTheme.bodyLarge,
                                 textAlign: TextAlign.center,
                               ),
@@ -333,7 +386,9 @@ class _QuizPageState extends State<QuizPage> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(16.0),
                     child: ActionButton(
-                      text: showExample ? 'Nächste Vokabel' : 'Antwort überprüfen',
+                      text: showExample
+                          ? 'Nächste Vokabel'
+                          : 'Antwort überprüfen',
                       onPressed: showExample ? _nextQuestion : _handleAnswer,
                     ),
                   ),

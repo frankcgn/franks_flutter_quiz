@@ -1,6 +1,5 @@
 // vocabulary.dart
 import 'package:uuid/uuid.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 String formatDate(DateTime date) {
   return '${date.day.toString().padLeft(2, '0')}.'
@@ -21,6 +20,7 @@ class Vocabulary {
   final String germanSentence;
   final DateTime creationDate;
   final String? group; // Optionaler Gruppenname
+  int answerCount;
 
   int deToEnCounter;
   DateTime? deToEnLastQuery;
@@ -40,6 +40,7 @@ class Vocabulary {
     this.enToDeCounter = 0,
     this.enToDeLastQuery,
     this.group,
+    this.answerCount = 0,
   })  : uuid = uuid ?? Uuid().v4(), // Falls keine UUID übergeben wurde, generiere eine neue.
         creationDate = creationDate ?? DateTime.now();
 
@@ -55,7 +56,8 @@ class Vocabulary {
     'enToDeCounter': enToDeCounter,
     'enToDeLastQuery': enToDeLastQuery != null ? formatDate(enToDeLastQuery!) : null,
     'group': group,
-  };
+        'answerCount': answerCount,
+      };
 
   factory Vocabulary.fromJson(Map<String, dynamic> json) {
     return Vocabulary(
@@ -70,6 +72,7 @@ class Vocabulary {
       enToDeCounter: json['enToDeCounter'] is int ? json['enToDeCounter'] as int : 0,
       enToDeLastQuery: json['enToDeLastQuery'] != null ? parseDate(json['enToDeLastQuery'] as String) : null,
       group: json['group'] as String?,
+      answerCount: json['answerCount'] is int ? json['answerCount'] as int : 0,
     );
   }
 
