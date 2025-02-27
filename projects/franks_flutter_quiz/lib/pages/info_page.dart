@@ -1,13 +1,15 @@
 // pages/info_page.dart
 import 'package:flutter/material.dart';
+
 import '../models/appSettings.dart';
 import 'home_page.dart';
 
 class InfoPage extends StatefulWidget {
   final AppSettings settings;
   final Function(AppSettings) onSettingsChanged;
-  const InfoPage({Key? key, required this.settings, required this.onSettingsChanged})
-      : super(key: key);
+
+  const InfoPage(
+      {super.key, required this.settings, required this.onSettingsChanged});
 
   @override
   _InfoPageState createState() => _InfoPageState();

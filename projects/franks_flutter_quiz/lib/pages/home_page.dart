@@ -11,7 +11,9 @@ import 'voc_mgmt_page.dart';
 class HomePage extends StatefulWidget {
   final AppSettings settings;
   final Function(AppSettings) onSettingsChanged;
-  HomePage({required this.settings, required this.onSettingsChanged});
+
+  const HomePage(
+      {super.key, required this.settings, required this.onSettingsChanged});
 
   @override
   _HomePageState createState() => _HomePageState();

@@ -1,6 +1,4 @@
 // models.dart
-import 'package:uuid/uuid.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 enum QuizState { waitingForAnswer, wrongAnswer, correctAnswer }
 

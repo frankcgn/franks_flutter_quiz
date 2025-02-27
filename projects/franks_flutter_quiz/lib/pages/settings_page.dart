@@ -6,7 +6,9 @@ import '../models/appSettings.dart';
 class SettingsPage extends StatefulWidget {
   final AppSettings settings;
   final Function(AppSettings) onSettingsChanged;
-  SettingsPage({
+
+  const SettingsPage({
+    super.key,
     required this.settings,
     required this.onSettingsChanged,
   });

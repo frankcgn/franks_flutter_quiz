@@ -11,8 +11,9 @@ class VocabularyManagementPage extends StatefulWidget {
   final VocabularyCallback onUpdate;
   final VocabularyCallback onDelete;
 
-  VocabularyManagementPage(
-      {required this.vocabularies,
+  const VocabularyManagementPage(
+      {super.key,
+      required this.vocabularies,
       required this.onInsert,
       required this.onUpdate,
       required this.onDelete});
@@ -133,7 +134,7 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
 
   void _showEditDialog(int index) {
     Vocabulary voc = widget.vocabularies[index];
-    final GlobalKey<FormState> _editFormKey = GlobalKey<FormState>();
+    final GlobalKey<FormState> editFormKey = GlobalKey<FormState>();
     String editedGerman = voc.german;
     String editedEnglish = voc.english;
     String editedEnglishSentence = voc.englishSentence;
@@ -146,7 +147,7 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: Text('Vokabel bearbeiten'),
           content: Form(
-            key: _editFormKey,
+            key: editFormKey,
             child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -220,7 +221,7 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
             ElevatedButton(
               child: Text('Speichern'),
               onPressed: () {
-                if (_editFormKey.currentState!.validate()) {
+                if (editFormKey.currentState!.validate()) {
                   setState(() {
                     widget.vocabularies[index] = Vocabulary(
                       german: editedGerman,
@@ -312,8 +313,8 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
         onPressed: _showAddDialog,
+        child: Icon(Icons.add),
       ),
     );
   }

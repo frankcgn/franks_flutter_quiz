@@ -58,7 +58,7 @@ class DatabaseService {
   }
 
   void deleteVocabulary(String vocId) {
-    logger.d('DELETE: VOC: ${vocId}');
+    logger.d('DELETE: VOC: $vocId');
     _vocabularyRef.doc(vocId).delete();
   }
 }

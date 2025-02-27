@@ -6,10 +6,10 @@ class SpeakButtonsRow extends StatelessWidget {
   final VoidCallback onSpeakSentence;
 
   const SpeakButtonsRow({
-    Key? key,
+    super.key,
     required this.onSpeakVocabulary,
     required this.onSpeakSentence,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

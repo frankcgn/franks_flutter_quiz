@@ -26,7 +26,8 @@ class QuizPage extends StatefulWidget {
   final VocabularyCallback onUpdate;
   final bool quizGerman;
 
-  QuizPage({
+  const QuizPage({
+    super.key,
     required this.vocabularies,
     required this.settings,
     required this.onUpdate,
@@ -155,17 +156,21 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
     final DateTime today = DateTime.now();
     if (askGerman) {
       if (voc.deToEnCounter < 3) return true;
-      if (voc.deToEnCounter == 3)
+      if (voc.deToEnCounter == 3) {
         return _isDueHelper(voc.deToEnLastQuery, settings.intervalFor3, today);
-      if (voc.deToEnCounter == 4)
+      }
+      if (voc.deToEnCounter == 4) {
         return _isDueHelper(voc.deToEnLastQuery, settings.intervalFor4, today);
+      }
       return _isDueHelper(voc.deToEnLastQuery, settings.intervalFor5, today);
     } else {
       if (voc.enToDeCounter < 3) return true;
-      if (voc.enToDeCounter == 3)
+      if (voc.enToDeCounter == 3) {
         return _isDueHelper(voc.enToDeLastQuery, settings.intervalFor3, today);
-      if (voc.enToDeCounter == 4)
+      }
+      if (voc.enToDeCounter == 4) {
         return _isDueHelper(voc.enToDeLastQuery, settings.intervalFor4, today);
+      }
       return _isDueHelper(voc.enToDeLastQuery, settings.intervalFor5, today);
     }
   }
@@ -299,6 +304,10 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
                                 _filterMode.value = index;
                                 activeVocabulary =
                                     null; // Beim Filterwechsel neu auswählen.
+                                quizState = QuizState.waitingForAnswer;
+                                showExample = false;
+                                _inputEnabled = true;
+                                answerController.clear();
                               });
                             },
                           ),

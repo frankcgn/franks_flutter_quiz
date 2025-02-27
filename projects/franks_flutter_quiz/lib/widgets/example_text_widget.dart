@@ -1,6 +1,6 @@
 // widgets/example_text_widget.dart
-import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:flutter/material.dart';
 
 class ExampleTextWidget extends StatelessWidget {
   final String exampleText;
@@ -9,12 +9,12 @@ class ExampleTextWidget extends StatelessWidget {
   final bool askGerman;
 
   const ExampleTextWidget({
-    Key? key,
+    super.key,
     required this.exampleText,
     required this.textStyle,
     required this.isEmptyExample,
     required this.askGerman,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

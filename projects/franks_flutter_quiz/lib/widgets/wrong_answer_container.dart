@@ -1,16 +1,16 @@
 // widgets/wrong_answer_container.dart
-import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:flutter/material.dart';
 
 class WrongAnswerContainer extends StatelessWidget {
   final String expectedAnswer;
   final double height;
 
   const WrongAnswerContainer({
-    Key? key,
+    super.key,
     required this.expectedAnswer,
     this.height = 60.0,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -25,6 +25,8 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -200,6 +202,8 @@ class VocabularyStorage {
 // --- HomePage ---
 // Lädt beim Start die Vokabeln (und fügt initial die 5. Schulklasse-Vokabeln hinzu, falls die Datei leer ist) und bietet Navigation zwischen Verwaltung und Quiz.
 class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -274,7 +278,9 @@ class _HomePageState extends State<HomePage> {
 class VocabularyManagementPage extends StatefulWidget {
   final List<Vocabulary> vocabularies;
   final VoidCallback onUpdate;
-  VocabularyManagementPage({required this.vocabularies, required this.onUpdate});
+
+  const VocabularyManagementPage(
+      {super.key, required this.vocabularies, required this.onUpdate});
 
   @override
   _VocabularyManagementPageState createState() => _VocabularyManagementPageState();
@@ -390,7 +396,7 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
 
   void _showEditDialog(int index) {
     Vocabulary voc = widget.vocabularies[index];
-    final GlobalKey<FormState> _editFormKey = GlobalKey<FormState>();
+    final GlobalKey<FormState> editFormKey = GlobalKey<FormState>();
     String editedGerman = voc.german;
     String editedEnglish = voc.english;
     String editedEnglishSentence = voc.englishSentence;
@@ -402,7 +408,7 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: Text('Vokabel bearbeiten'),
           content: Form(
-            key: _editFormKey,
+            key: editFormKey,
             child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -478,7 +484,7 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
             ElevatedButton(
               child: Text('Speichern'),
               onPressed: () {
-                if (_editFormKey.currentState!.validate()) {
+                if (editFormKey.currentState!.validate()) {
                   setState(() {
                     widget.vocabularies[index] = Vocabulary(
                       german: editedGerman,
@@ -547,8 +553,8 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
         onPressed: _showAddDialog,
+        child: Icon(Icons.add),
       ),
     );
   }
@@ -564,7 +570,9 @@ enum QuizState { waitingForAnswer, wrongAnswer, correctAnswer }
 class QuizPage extends StatefulWidget {
   final List<Vocabulary> vocabularies;
   final VoidCallback onUpdate;
-  QuizPage({required this.vocabularies, required this.onUpdate});
+
+  const QuizPage(
+      {super.key, required this.vocabularies, required this.onUpdate});
 
   @override
   _QuizPageState createState() => _QuizPageState();

@@ -1,16 +1,16 @@
 // widgets/question_container.dart
-import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:flutter/material.dart';
 
 class QuestionContainer extends StatelessWidget {
   final String questionText;
   final double height;
 
   const QuestionContainer({
-    Key? key,
+    super.key,
     required this.questionText,
     this.height = 60.0,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

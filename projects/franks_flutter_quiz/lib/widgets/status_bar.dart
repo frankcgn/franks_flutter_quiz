@@ -7,12 +7,12 @@ class StatusBar extends StatelessWidget {
   final ValueChanged<int> onFilterSelected; // Callback zum Setzen des Filters
 
   const StatusBar({
-    Key? key,
+    super.key,
     required this.stats,
     required this.darkMode,
     required this.selectedFilterIndex,
     required this.onFilterSelected,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

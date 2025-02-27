@@ -30,6 +30,8 @@ void main() async {
 }
 
 class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
   @override
   _MyAppState createState() => _MyAppState();
 }
@@ -69,11 +71,9 @@ class _MyAppState extends State<MyApp> {
     }
     final ThemeData theme = settings.darkMode
         ? ThemeData.dark().copyWith(
-            useMaterial3: true,
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, brightness: Brightness.dark),
           )
         : ThemeData.light().copyWith(
-            useMaterial3: true,
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           );
     return MaterialApp(

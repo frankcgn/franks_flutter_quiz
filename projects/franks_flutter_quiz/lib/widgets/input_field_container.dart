@@ -10,14 +10,14 @@ class InputFieldContainer extends StatelessWidget {
   final TextStyle? textStyle;
 
   const InputFieldContainer({
-    Key? key,
+    super.key,
     required this.controller,
     required this.focusNode,
     required this.enabled,
     required this.borderColor,
     required this.onSubmitted,
     this.textStyle,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

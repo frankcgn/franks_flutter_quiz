@@ -1,6 +1,6 @@
 // widgets/submitted_answer_container.dart
-import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:flutter/material.dart';
 
 class SubmittedAnswerContainer extends StatelessWidget {
   final String answerText;
@@ -8,11 +8,11 @@ class SubmittedAnswerContainer extends StatelessWidget {
   final double height;
 
   const SubmittedAnswerContainer({
-    Key? key,
+    super.key,
     required this.answerText,
     required this.borderColor,
     this.height = 60.0,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
