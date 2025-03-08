@@ -26,30 +26,41 @@ class DatabaseService {
     });
   }
 
-  // lädt alle Vokabeln auf einmal
+  // lädt alle Vokabeln auf einmal und löscht fehlerhafte dokumente
   Future<List<Vocabulary>> getCompleteVocabularies() async {
     QuerySnapshot snapshot =
         await FirebaseFirestore.instance.collection(TODO_COLLETION_REF).get();
-    return snapshot.docs.map((doc) {
-      return Vocabulary.fromJson(doc.data() as Map<String, dynamic>);
-    }).toList();
+
+    List<Vocabulary> vocabularies = [];
+    for (var doc in snapshot.docs) {
+      try {
+        var vocabulary =
+            Vocabulary.fromJson(doc.data() as Map<String, dynamic>);
+        vocabularies.add(vocabulary);
+      } catch (e) {
+        print("Fehler beim Laden des Datensatzes mit ID ${doc.id}: $e");
+        // await doc.reference.delete();
+      }
+    }
+    return vocabularies;
   }
 
   Stream<QuerySnapshot> getVocabularies() {
     return _vocabularyRef.snapshots();
   }
 
-  void addOrUpdateVocabulary(Vocabulary voc) {
-    if (voc.uuid.isEmpty) {
-      addVocabulary(voc);
-    } else {
-      updateVocabulary(voc.uuid, voc);
-    }
-  }
+  // void addOrUpdateVocabulary(Vocabulary voc) {
+  //   if (voc.uuid.isEmpty) {
+  //     addVocabulary(voc);
+  //   } else {
+  //     updateVocabulary(voc.uuid, voc);
+  //   }
+  // }
 
   void addVocabulary(Vocabulary voc) async {
     logger.d('ADD: VOC: ${voc.german}');
-    _vocabularyRef.add(voc);
+    // speichert die uuid als documentID
+    _vocabularyRef.doc(voc.uuid).set(voc);
   }
 
   void updateVocabulary(String vocId, Vocabulary voc) {

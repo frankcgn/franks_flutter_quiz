@@ -4,17 +4,43 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ae404f1f-f59e-4b7d-9848-53b6e9597e58" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="ae404f1f-f59e-4b7d-9848-53b6e9597e58" name="Changes" comment="lints">
+      <change beforePath="$PROJECT_DIR$/.idea/dev.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dev.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/info_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/info_page.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/voc_mgmt_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/voc_mgmt_page.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/services/database_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/services/database_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/pubspec.lock" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Dart File" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;frankcgn&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/frankcgn/franks_flutter_quiz.git&quot;,
+    &quot;accountId&quot;: &quot;51f80043-deba-479b-b968-485316bfd2bb&quot;
+  }
+}</component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 5
@@ -26,12 +52,14 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Flutter.main.dart.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "dart.analysis.tool.window.visible": "false",
     "git-widget-placeholder": "main",
+    "io.flutter.reload.alreadyRun": "true",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/Users/frank/dev",
+    "last_opened_file_path": "/Users/frank/IdeaProjects/franks_flutter_quiz/projects/franks_flutter_quiz/assets/icons",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -42,6 +70,21 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/projects/franks_flutter_quiz/assets/icons" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/services" />
+      <recent name="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/models" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="main.dart" type="FlutterRunConfigurationType" factoryName="Flutter">
+      <option name="filePath" value="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/main.dart" />
+      <method v="2" />
+    </configuration>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -61,11 +104,175 @@
       <workItem from="1739388044323" duration="9000" />
       <workItem from="1740218753594" duration="5369000" />
       <workItem from="1740236004224" duration="659000" />
+      <workItem from="1740236692458" duration="71612000" />
+      <workItem from="1741423142874" duration="8422000" />
     </task>
+    <task id="LOCAL-00001" summary="Model angepasst">
+      <option name="closed" value="true" />
+      <created>1740243204139</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1740243204139</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Model angepasst">
+      <option name="closed" value="true" />
+      <created>1740243413601</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1740243413601</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Aktuelle Daten aus Datenbank laden">
+      <option name="closed" value="true" />
+      <created>1740246148423</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1740246148423</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Aktuelle Daten in Datenbank speichern">
+      <option name="closed" value="true" />
+      <created>1740249649745</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1740249649745</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Aktuelle Updated in Datenbank speichern">
+      <option name="closed" value="true" />
+      <created>1740262644096</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1740262644096</updated>
+    </task>
+    <task id="LOCAL-00006" summary="quiz widgets refactory">
+      <option name="closed" value="true" />
+      <created>1740429040417</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1740429040417</updated>
+    </task>
+    <task id="LOCAL-00007" summary="quiz widgets refactory">
+      <option name="closed" value="true" />
+      <created>1740429886154</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1740429886154</updated>
+    </task>
+    <task id="LOCAL-00008" summary="refactoring storage">
+      <option name="closed" value="true" />
+      <created>1740434502588</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1740434502588</updated>
+    </task>
+    <task id="LOCAL-00009" summary="refactoring firebase storage">
+      <option name="closed" value="true" />
+      <created>1740469107948</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1740469107948</updated>
+    </task>
+    <task id="LOCAL-00010" summary="refactoring firebase storage">
+      <option name="closed" value="true" />
+      <created>1740470750868</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1740470750868</updated>
+    </task>
+    <task id="LOCAL-00011" summary="statusbar filter">
+      <option name="closed" value="true" />
+      <created>1740484908590</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1740484908590</updated>
+    </task>
+    <task id="LOCAL-00012" summary="ergebnis ohne klammerprüfung">
+      <option name="closed" value="true" />
+      <created>1740612589705</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1740612589705</updated>
+    </task>
+    <task id="LOCAL-00013" summary="lints">
+      <option name="closed" value="true" />
+      <created>1740639891902</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1740639891903</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Model angepasst" />
+    <MESSAGE value="Aktuelle Daten aus Datenbank laden" />
+    <MESSAGE value="Aktuelle Daten in Datenbank speichern" />
+    <MESSAGE value="Aktuelle Updated in Datenbank speichern" />
+    <MESSAGE value="quiz widgets refactory" />
+    <MESSAGE value="refactoring storage" />
+    <MESSAGE value="refactoring firebase storage" />
+    <MESSAGE value="statusbar filter" />
+    <MESSAGE value="ergebnis ohne klammerprüfung" />
+    <MESSAGE value="lints" />
+    <option name="LAST_COMMIT_MESSAGE" value="lints" />
+    <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
+    <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="Dart">
+          <url>file://$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/voc_mgmt_page.dart</url>
+          <line>2</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="Dart">
+          <url>file://$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/info_page.dart</url>
+          <line>1</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="Dart">
+          <url>file://$PROJECT_DIR$/projects/franks_flutter_quiz/lib/services/database_service.dart</url>
+          <line>66</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="Dart">
+          <url>file://$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/voc_mgmt_page.dart</url>
+          <line>291</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="Dart">
+          <url>file://$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/voc_mgmt_page.dart</url>
+          <line>293</line>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
