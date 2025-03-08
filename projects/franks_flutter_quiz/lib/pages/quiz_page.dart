@@ -11,9 +11,7 @@ import '../widgets/action_button.dart';
 import '../widgets/example_text_widget.dart';
 import '../widgets/input_field_container.dart';
 import '../widgets/question_container.dart';
-import '../widgets/speak_buttons_row.dart';
 import '../widgets/status_bar.dart';
-import '../widgets/submitted_answer_container.dart';
 import '../widgets/wrong_answer_container.dart';
 
 typedef VocabularyCallback = void Function(Vocabulary voc);
@@ -194,6 +192,11 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
     await flutterTts.speak(voc.english);
   }
 
+  Future<void> _speakEnglishText(String text) async {
+    await flutterTts.setLanguage("en-US");
+    await flutterTts.speak(text);
+  }
+
   Future<void> _speakEnglishSentence() async {
     final Vocabulary? voc = currentVocabulary;
     if (voc == null) return;
@@ -252,7 +255,6 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
 
   @override
   Widget build(BuildContext context) {
-    // Ermitteln aller vorhandenen Gruppen (ohne leere Werte)
     final List<String> groups = widget.vocabularies
         .map((voc) => voc.group ?? '')
         .where((g) => g.isNotEmpty)
@@ -332,7 +334,7 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
                         ],
                       ),
                     ),
-                    // Statusbar, die jetzt auch den Gruppenfilter berücksichtigt
+                    // Statusbar, die nun auch den Gruppenfilter berücksichtigt
                     StatusBar(
                       stats: stats,
                       darkMode: darkMode,
@@ -354,73 +356,107 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
                       style: Theme.of(context).textTheme.bodyMedium,
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Expanded(
-                            child:
-                                QuestionContainer(questionText: questionText)),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    ExampleTextWidget(
-                      exampleText: exampleText,
-                      textStyle: exampleStyle,
-                      isEmptyExample: noExample,
-                      askGerman: askGerman,
-                    ),
-                    const SizedBox(height: 20),
-                    InputFieldContainer(
-                      controller: answerController,
-                      focusNode: _focusNode,
-                      enabled: _inputEnabled,
-                      borderColor: inputBorderColor,
-                      onSubmitted: (value) {
-                        if (!_inputEnabled) {
-                          _nextQuestion();
-                        } else {
-                          _handleAnswer();
-                        }
-                      },
-                      textStyle:
-                          Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                color: showExample
-                                    ? (quizState == QuizState.correctAnswer
-                                        ? Colors.green
-                                        : Colors.red)
-                                    : Colors.black,
-                              ),
-                    ),
-                    if (showExample && quizState == QuizState.correctAnswer)
-                      SubmittedAnswerContainer(
-                        answerText: answerController.text,
-                        borderColor: inputBorderColor,
-                      ),
-                    if (showExample && quizState == QuizState.wrongAnswer)
-                      WrongAnswerContainer(expectedAnswer: expectedAnswer),
-                    if (showExample)
-                      Padding(
+                    // Scrollbarer Bereich, der Frage, Beispieltext, Eingabefeld und Antwort umfasst
+                    Expanded(
+                      child: SingleChildScrollView(
                         padding: const EdgeInsets.all(8.0),
-                        child: AutoSizeText(
-                          'Beispielsatz (${askGerman ? "Englisch" : "Deutsch"}):\n${(askGerman ? currentVoc.englishSentence : currentVoc.germanSentence).trim().isEmpty ? (askGerman ? "no text available" : "kein text vorhanden") : (askGerman ? currentVoc.englishSentence : currentVoc.germanSentence)}',
-                          style: ((askGerman
-                                      ? currentVoc.englishSentence
-                                      : currentVoc.germanSentence)
-                                  .trim()
-                                  .isEmpty)
-                              ? Theme.of(context)
-                                  .textTheme
-                                  .bodyLarge!
-                                  .copyWith(fontStyle: FontStyle.italic)
-                              : Theme.of(context).textTheme.bodyLarge,
-                          textAlign: TextAlign.center,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: QuestionContainer(
+                                      questionText: questionText),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            ExampleTextWidget(
+                              exampleText: exampleText,
+                              textStyle: exampleStyle,
+                              isEmptyExample: noExample,
+                              askGerman: askGerman,
+                            ),
+                            const SizedBox(height: 20),
+                            // Eingabefeld mit Antwort, daneben das Speak-Icon für _speakEnglish
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: InputFieldContainer(
+                                    controller: answerController,
+                                    focusNode: _focusNode,
+                                    enabled: _inputEnabled,
+                                    borderColor: inputBorderColor,
+                                    onSubmitted: (value) {
+                                      if (!_inputEnabled) {
+                                        _nextQuestion();
+                                      } else {
+                                        _handleAnswer();
+                                      }
+                                    },
+                                    textStyle: Theme.of(context)
+                                        .textTheme
+                                        .headlineSmall
+                                        ?.copyWith(
+                                          color: showExample
+                                              ? (quizState ==
+                                                      QuizState.correctAnswer
+                                                  ? Colors.green
+                                                  : Colors.red)
+                                              : Colors.black,
+                                        ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            if (showExample &&
+                                quizState == QuizState.wrongAnswer)
+                              WrongAnswerContainer(
+                                expectedAnswer: expectedAnswer,
+                                onPressed: () {},
+                              ),
+                            if (showExample)
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Expanded(
+                                      child: AutoSizeText(
+                                        'Beispielsatz (${askGerman ? "Englisch" : "Deutsch"}):\n${(askGerman ? currentVoc.englishSentence : currentVoc.germanSentence).trim().isEmpty ? (askGerman ? "no text available" : "kein text vorhanden") : (askGerman ? currentVoc.englishSentence : currentVoc.germanSentence)}',
+                                        style: ((askGerman
+                                                    ? currentVoc.englishSentence
+                                                    : currentVoc.germanSentence)
+                                                .trim()
+                                                .isEmpty)
+                                            ? Theme.of(context)
+                                                .textTheme
+                                                .bodyLarge!
+                                                .copyWith(
+                                                    fontStyle: FontStyle.italic)
+                                            : Theme.of(context)
+                                                .textTheme
+                                                .bodyLarge,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.volume_up,
+                                          size: 16.0),
+                                      onPressed: () => _speakEnglishText(
+                                          askGerman
+                                              ? currentVoc.englishSentence
+                                              : currentVoc.germanSentence),
+                                      tooltip: 'Sprich den Beispielsatz aus',
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
                         ),
                       ),
-                    if (showExample)
-                      SpeakButtonsRow(
-                        onSpeakVocabulary: _speakEnglish,
-                        onSpeakSentence: _speakEnglishSentence,
-                      ),
+                    ),
                   ],
                 );
               },
@@ -428,7 +464,6 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
           ),
         ),
       ),
-      // ActionButton im bottomNavigationBar sorgt dafür, dass er immer unten bleibt.
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ActionButton(

@@ -20,6 +20,7 @@ class SpeakButtonsRow extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
+              iconSize: 16.0,
               icon: const Icon(Icons.volume_up),
               onPressed: onSpeakVocabulary,
               tooltip: 'Sprich die Vokabel aus',
@@ -32,6 +33,7 @@ class SpeakButtonsRow extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
+              iconSize: 16.0,
               icon: const Icon(Icons.volume_up),
               onPressed: onSpeakSentence,
               tooltip: 'Sprich den Beispielsatz aus',

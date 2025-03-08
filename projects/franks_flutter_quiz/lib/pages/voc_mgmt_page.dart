@@ -1,5 +1,6 @@
 // voc_mgmt_page.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/vocabulary.dart';
@@ -25,7 +26,8 @@ class VocabularyManagementPage extends StatefulWidget {
       _VocabularyManagementPageState();
 }
 
-class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
+class _VocabularyManagementPageState extends State<VocabularyManagementPage>
+    with RestorationMixin {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String _german = '';
   String _english = '';
@@ -34,11 +36,21 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
   String _group = '';
   String _searchQuery = '';
 
-  // Neuer State für den Gruppenfilter. "Alle" zeigt alle Vokabeln an.
-  String _selectedGroup = 'Alle';
+  FlutterTts flutterTts = FlutterTts();
+
+  // Hier wird der RestorableString deklariert:
+  final RestorableString _selectedGroupRestorable = RestorableString('Alle');
 
   // Uuid-Generator
   final Uuid uuidGenerator = Uuid();
+
+  @override
+  String? get restorationId => 'voc_mgmt_page';
+
+  @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    registerForRestoration(_selectedGroupRestorable, 'selected_group');
+  }
 
   void _showAddDialog() {
     showDialog(
@@ -87,13 +99,7 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
                       labelText: 'Beispielsatz Englisch',
                       border: OutlineInputBorder(),
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Bitte einen englischen Beispielsatz eingeben';
-                      }
-                      return null;
-                    },
-                    onSaved: (value) => _englishSentence = value!,
+                    onSaved: (value) => _englishSentence = value ?? '',
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
@@ -101,13 +107,7 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
                       labelText: 'Beispielsatz Deutsch',
                       border: OutlineInputBorder(),
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Bitte einen deutschen Beispielsatz eingeben';
-                      }
-                      return null;
-                    },
-                    onSaved: (value) => _germanSentence = value!,
+                    onSaved: (value) => _germanSentence = value ?? '',
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
@@ -216,13 +216,7 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
                       labelText: 'Beispielsatz Englisch',
                       border: OutlineInputBorder(),
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Bitte einen englischen Beispielsatz eingeben';
-                      }
-                      return null;
-                    },
-                    onChanged: (value) => editedEnglishSentence = value,
+                    onChanged: (value) => editedEnglishSentence = value ?? '',
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
@@ -231,13 +225,7 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
                       labelText: 'Beispielsatz Deutsch',
                       border: OutlineInputBorder(),
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Bitte einen deutschen Beispielsatz eingeben';
-                      }
-                      return null;
-                    },
-                    onChanged: (value) => editedGermanSentence = value,
+                    onChanged: (value) => editedGermanSentence = value ?? '',
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
@@ -324,8 +312,8 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
       bool matchesSearch =
           voc.german.toLowerCase().contains(_searchQuery.toLowerCase()) ||
               voc.english.toLowerCase().contains(_searchQuery.toLowerCase());
-      bool matchesGroup = _selectedGroup == 'Alle' ||
-          (voc.group != null && voc.group == _selectedGroup);
+      bool matchesGroup = _selectedGroupRestorable.value == 'Alle' ||
+          (voc.group != null && voc.group == _selectedGroupRestorable.value);
       return matchesSearch && matchesGroup;
     }).toList();
 
@@ -333,9 +321,9 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
     filteredVocabs.sort((a, b) => a.german.compareTo(b.german));
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Vokabeln verwalten'),
-      ),
+      //  appBar: AppBar(
+      //    title: const Text('Vokabeln verwalten'),
+      //  ),
       body: Column(
         children: [
           // Dropdown für den Gruppenfilter (über dem Suchfeld)
@@ -347,10 +335,10 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
                 const Text('Gruppe:'),
                 DropdownButton<String>(
                   isExpanded: true,
-                  value: _selectedGroup,
+                  value: _selectedGroupRestorable.value,
                   onChanged: (String? newValue) {
                     setState(() {
-                      _selectedGroup = newValue!;
+                      _selectedGroupRestorable.value = newValue ?? 'Alle';
                     });
                   },
                   items: <String>['Alle', ...groups]
@@ -408,6 +396,10 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
                           icon: const Icon(Icons.delete),
                           onPressed: () => _deleteVocabularyByUUID(voc.uuid),
                         ),
+                        IconButton(
+                          icon: const Icon(Icons.volume_up, size: 16.0),
+                          onPressed: () => _speakEnglishText(voc.english),
+                        ),
                       ],
                     ),
                   ),
@@ -422,5 +414,10 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
         child: const Icon(Icons.add),
       ),
     );
+  }
+
+  Future<void> _speakEnglishText(String text) async {
+    await flutterTts.setLanguage("en-US");
+    await flutterTts.speak(text);
   }
 }

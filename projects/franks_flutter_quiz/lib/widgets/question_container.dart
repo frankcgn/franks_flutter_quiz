@@ -9,7 +9,7 @@ class QuestionContainer extends StatelessWidget {
   const QuestionContainer({
     super.key,
     required this.questionText,
-    this.height = 30.0,
+    this.height = 45.0,
   });
 
   @override

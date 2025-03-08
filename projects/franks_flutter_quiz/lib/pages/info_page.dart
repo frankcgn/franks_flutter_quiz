@@ -44,7 +44,7 @@ class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
               ),
               const SizedBox(height: 16),
               Text(
-                'Version:\n20250308-001',
+                'Version:\n20250309-001',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Colors.black),
               ),

@@ -20,6 +20,7 @@ DateTime parseDate(String dateStr) {
   return DateTime(year, month, day);
 }
 
+// WIRD AKTUELL NICHT VERWENDET
 void main() {
   runApp(MyApp());
 }
@@ -31,6 +32,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Vokabel Trainer',
+      restorationScopeId: 'app3', // restorationScopeId festlegen
       theme: ThemeData(
         colorSchemeSeed: Colors.deepPurple,
         useMaterial3: true,

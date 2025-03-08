@@ -64,6 +64,8 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     if (!settingsLoaded) {
       return MaterialApp(
+        title: 'Vokabel Trainer 1',
+        restorationScopeId: 'app', // restorationScopeId festlegen
         home: Scaffold(
           body: Center(child: CircularProgressIndicator()),
         ),
@@ -77,8 +79,9 @@ class _MyAppState extends State<MyApp> {
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           );
     return MaterialApp(
-      title: 'Vokabel Trainer',
+      title: 'Vokabel Trainer 2',
       theme: theme,
+      restorationScopeId: 'app2', // restorationScopeId festlegen
       home: InfoPage(settings: settings, onSettingsChanged: updateSettings),
     );
   }

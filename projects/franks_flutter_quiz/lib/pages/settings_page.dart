@@ -140,12 +140,12 @@ class _SettingsPageState extends State<SettingsPage> {
 
     List<Vocabulary> importedVocabs = [];
     for (var row in rows) {
-      // Annahme: Spalte 0: German, 1: English, 2: GermanSentence, 3: EnglishSentence, 4: Gruppe (optional)
-      String german = row.length > 0 ? row[0].toString() : "";
-      String english = row.length > 1 ? row[1].toString() : "";
-      String germanSentence = row.length > 2 ? row[2].toString() : "";
-      String englishSentence = row.length > 3 ? row[3].toString() : "";
-      String group = row.length > 4 ? row[4].toString() : "";
+      // Annahme: Spalte 0: English, 1: German, 2: EnglishSentence, 3: GermanSentence, 4: Gruppe (optional)
+      String english = row.length > 0 ? row[0].toString().trim() : "";
+      String german = row.length > 1 ? row[1].toString().trim() : "";
+      String englishSentence = row.length > 2 ? row[2].toString().trim() : "";
+      String germanSentence = row.length > 3 ? row[3].toString().trim() : "";
+      String group = row.length > 4 ? row[4].toString().trim() : "neu";
       // Generiere eine neue UUID
       String newUuid = uuidGenerator.v4();
       Vocabulary voc = Vocabulary(
@@ -166,6 +166,7 @@ class _SettingsPageState extends State<SettingsPage> {
     for (var voc in importedVocabs) {
       print('Imported: ${voc.german} (uuid: ${voc.uuid})');
     }
+    // BEREITS GESCHEHEN
     // Speichere die importierten Vokabeln in der Datenbank (z.B. Firestore)
     for (var voc in importedVocabs) {
       await FirebaseFirestore.instance
