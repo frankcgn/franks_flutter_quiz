@@ -34,6 +34,9 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
   String _group = '';
   String _searchQuery = '';
 
+  // Neuer State für den Gruppenfilter. "Alle" zeigt alle Vokabeln an.
+  String _selectedGroup = 'Alle';
+
   // Uuid-Generator
   final Uuid uuidGenerator = Uuid();
 
@@ -154,11 +157,9 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
 
   /// Öffnet den Edit-Dialog für das übergebene Vocabulary.
   void _showEditDialogForVocabulary(Vocabulary voc) {
-    // Ermittle den Index in der Original-Liste anhand der UUID.
     int originalIndex =
         widget.vocabularies.indexWhere((v) => v.uuid == voc.uuid);
-    if (originalIndex < 0) return; // Sollte nicht passieren
-
+    if (originalIndex < 0) return;
     Vocabulary originalVoc = widget.vocabularies[originalIndex];
     final GlobalKey<FormState> editFormKey = GlobalKey<FormState>();
     String editedGerman = originalVoc.german;
@@ -262,7 +263,6 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
                 if (editFormKey.currentState!.validate()) {
                   Vocabulary updatedVoc = Vocabulary(
                     uuid: originalVoc.uuid,
-                    // UUID beibehalten!
                     german: editedGerman,
                     english: editedEnglish,
                     englishSentence: editedEnglishSentence,
@@ -293,9 +293,7 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
         widget.vocabularies[idx] = updatedVoc;
       });
       widget.onUpdate(updatedVoc);
-      // Ausgabe der UUID beim Update
-      print(
-          'Updated vocabulary with uuid: ${updatedVoc.uuid} - ${updatedVoc.german} - ${idx}');
+      print('Updated vocabulary with uuid: ${updatedVoc.uuid}');
     }
   }
 
@@ -308,19 +306,30 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
     setState(() {
       widget.vocabularies.removeAt(originalIndex);
     });
-    // Ausgabe der UUID beim Löschen:
     print('Deleted vocabulary with uuid: $uuid');
   }
 
   @override
   Widget build(BuildContext context) {
-    // Filtere die Vokabelliste anhand des Suchbegriffs.
+    // Ermitteln aller vorhandenen Gruppen (ohne leere Werte)
+    final List<String> groups = widget.vocabularies
+        .map((voc) => voc.group ?? '')
+        .where((g) => g.isNotEmpty)
+        .toSet()
+        .toList();
+    groups.sort();
+
+    // Filtere die Vokabelliste anhand des Suchbegriffs und des Gruppenfilters.
     List<Vocabulary> filteredVocabs = widget.vocabularies.where((voc) {
-      return voc.german.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          voc.english.toLowerCase().contains(_searchQuery.toLowerCase());
+      bool matchesSearch =
+          voc.german.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+              voc.english.toLowerCase().contains(_searchQuery.toLowerCase());
+      bool matchesGroup = _selectedGroup == 'Alle' ||
+          (voc.group != null && voc.group == _selectedGroup);
+      return matchesSearch && matchesGroup;
     }).toList();
 
-    // Sortiere die gefilterte Liste immer alphabetisch nach "german"
+    // Sortiere die gefilterte Liste alphabetisch nach "german".
     filteredVocabs.sort((a, b) => a.german.compareTo(b.german));
 
     return Scaffold(
@@ -329,6 +338,32 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
       ),
       body: Column(
         children: [
+          // Dropdown für den Gruppenfilter (über dem Suchfeld)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Gruppe:'),
+                DropdownButton<String>(
+                  isExpanded: true,
+                  value: _selectedGroup,
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _selectedGroup = newValue!;
+                    });
+                  },
+                  items: <String>['Alle', ...groups]
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
+          ),
           // Suchfeld
           Padding(
             padding: const EdgeInsets.all(8.0),

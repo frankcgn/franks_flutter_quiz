@@ -39,7 +39,6 @@ class QuizPage extends StatefulWidget {
 }
 
 class _QuizPageState extends State<QuizPage> with RestorationMixin {
-  List<Vocabulary>? vocabularies;
   int currentIndex = 0;
   final TextEditingController answerController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
@@ -47,13 +46,19 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
   QuizState quizState = QuizState.waitingForAnswer;
   bool askGerman = true;
   bool showExample = false;
-  bool _inputEnabled = true; // Steuert, ob das Eingabefeld aktiv ist
+  bool _inputEnabled = true;
 
-  // Speichert die aktuell geprüfte Vokabel, damit diese konstant bleibt.
+  // Speichert die aktuell geprüfte Vokabel.
   Vocabulary? activeVocabulary;
 
-  // Neuer Filtermode, der mithilfe von RestorableInt persistiert wird.
+  // Neuer Filtermode (z.B. basierend auf der Anzahl richtiger Antworten)
   final RestorableInt _filterMode = RestorableInt(0);
+
+  // Neuer State für den Gruppenfilter – "Alle" zeigt alle Gruppen an.
+  String _selectedGroup = 'Alle';
+
+  // Suchbegriff
+  String _searchQuery = '';
 
   @override
   String? get restorationId => 'quiz_page';
@@ -76,38 +81,45 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
     if (oldWidget.quizGerman != widget.quizGerman) {
       setState(() {
         askGerman = widget.quizGerman;
-        activeVocabulary = null; // Bei Richtungswechsel zurücksetzen.
+        activeVocabulary = null;
       });
     }
   }
 
-  /// Hilfsmethode, die Klammern und deren Inhalt aus einem String entfernt.
   String normalizeAnswer(String s) {
     return s.replaceAll(RegExp(r'\([^)]*\)'), '').trim();
   }
 
-  /// Liefert die gefilterte Liste der Vokabeln basierend auf dem aktuellen Filtermode.
   List<Vocabulary> get filteredVocabularies {
-    return widget.vocabularies.where((voc) {
+    List<Vocabulary> list = widget.vocabularies.where((voc) {
       final int counter = askGerman ? voc.deToEnCounter : voc.enToDeCounter;
       switch (_filterMode.value) {
-        case 0: // Alle Vokabeln
+        case 0:
           return true;
-        case 1: // Nur Vokabeln mit 0 richtigen Antworten
+        case 1:
           return counter == 0;
-        case 2: // Nur Vokabeln mit 1 oder 2 richtigen Antworten
+        case 2:
           return counter == 1 || counter == 2;
-        case 3: // Nur Vokabeln mit 3 oder 4 richtigen Antworten
+        case 3:
           return counter == 3 || counter == 4;
-        case 4: // Nur Vokabeln mit mehr als 4 richtigen Antworten
+        case 4:
           return counter > 4;
         default:
           return true;
       }
     }).toList();
+    if (_selectedGroup != 'Alle') {
+      list = list.where((voc) => voc.group == _selectedGroup).toList();
+    }
+    if (_searchQuery.isNotEmpty) {
+      list = list.where((voc) {
+        return voc.german.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+            voc.english.toLowerCase().contains(_searchQuery.toLowerCase());
+      }).toList();
+    }
+    return list;
   }
 
-  /// Liefert die aktuell anzuzeigende Vokabel aus der gefilterten Liste.
   Vocabulary? get currentVocabulary {
     if (activeVocabulary != null) return activeVocabulary;
     if (filteredVocabularies.isEmpty) return null;
@@ -125,9 +137,9 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
   }
 
   Map<String, int> _computeStats() {
-    final int total = widget.vocabularies.length;
+    final int total = filteredVocabularies.length;
     int count0 = 0, count1_2 = 0, count3_4 = 0, countAbove4 = 0;
-    for (var voc in widget.vocabularies) {
+    for (var voc in filteredVocabularies) {
       final int counter = askGerman ? voc.deToEnCounter : voc.enToDeCounter;
       if (counter == 0) {
         count0++;
@@ -175,7 +187,6 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
     }
   }
 
-  /// Spricht die englische Vokabel per Text-to-Speech aus.
   Future<void> _speakEnglish() async {
     final Vocabulary? voc = currentVocabulary;
     if (voc == null) return;
@@ -183,7 +194,6 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
     await flutterTts.speak(voc.english);
   }
 
-  /// Spricht den englischen Beispielsatz per Text-to-Speech aus.
   Future<void> _speakEnglishSentence() async {
     final Vocabulary? voc = currentVocabulary;
     if (voc == null) return;
@@ -191,14 +201,11 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
     await flutterTts.speak(voc.englishSentence);
   }
 
-  /// Prüft die Antwort anhand der aktuellen Vokabel.
   void _handleAnswer() {
     final Vocabulary? voc = currentVocabulary;
     if (voc == null) return;
     final String givenAnswer = answerController.text.trim().toLowerCase();
-    // Erwartete Antwort wird abhängig von der Abfragerichtung gewählt.
     final String expectedAnswer = askGerman ? voc.english : voc.german;
-    // Bereinige beide Strings, indem Klammer-Inhalte entfernt werden.
     final String normalizedGiven = normalizeAnswer(givenAnswer).toLowerCase();
     final List<String> validAnswers = expectedAnswer
         .split(',')
@@ -212,7 +219,6 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
         if (correct) {
           voc.deToEnCounter = voc.deToEnCounter + 1;
         } else {
-          // Verringere den Zähler bei falscher Antwort, aber nicht unter 0.
           voc.deToEnCounter = max(voc.deToEnCounter - 1, 0);
         }
         voc.deToEnLastQuery = DateTime.now();
@@ -220,7 +226,6 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
         if (correct) {
           voc.enToDeCounter = voc.enToDeCounter + 1;
         } else {
-          // Verringere den Zähler bei falscher Antwort, aber nicht unter 0.
           voc.enToDeCounter = max(voc.enToDeCounter - 1, 0);
         }
         voc.enToDeLastQuery = DateTime.now();
@@ -232,7 +237,6 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
     widget.onUpdate(voc);
   }
 
-  /// Setzt activeVocabulary zurück, sodass beim nächsten Zugriff eine neue Vokabel gewählt wird.
   void _nextQuestion() {
     setState(() {
       answerController.clear();
@@ -248,6 +252,14 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
 
   @override
   Widget build(BuildContext context) {
+    // Ermitteln aller vorhandenen Gruppen (ohne leere Werte)
+    final List<String> groups = widget.vocabularies
+        .map((voc) => voc.group ?? '')
+        .where((g) => g.isNotEmpty)
+        .toSet()
+        .toList();
+    groups.sort();
+
     if (filteredVocabularies.isEmpty || currentVocabulary == null) {
       return const Center(child: Text('Keine fälligen Vokabeln vorhanden.'));
     }
@@ -268,7 +280,6 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
         : Theme.of(context).textTheme.bodyLarge!;
     final String expectedAnswer =
         askGerman ? currentVoc.english : currentVoc.german;
-    const double containerHeight = 60.0;
     final bool darkMode = widget.settings.darkMode;
     final Color inputBorderColor = quizState == QuizState.correctAnswer
         ? Colors.green
@@ -277,134 +288,152 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
         : Colors.grey;
     final Map<String, int> stats = _computeStats();
 
-    return GestureDetector(
-      behavior: HitTestBehavior.translucent,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Card(
-          elevation: 4,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return Column(
-                children: [
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.all(16.0),
+    return Scaffold(
+      body: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Card(
+            elevation: 4,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return Column(
+                  children: [
+                    // Dropdown für den Gruppenfilter (über der Statusbar)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8.0, vertical: 8.0),
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Übergabe des aktuellen Filterwerts an die StatusBar:
-                          StatusBar(
-                            stats: stats,
-                            darkMode: darkMode,
-                            selectedFilterIndex: _filterMode.value,
-                            onFilterSelected: (int index) {
+                          const Text('Gruppe:'),
+                          DropdownButton<String>(
+                            isExpanded: true,
+                            value: _selectedGroup,
+                            onChanged: (String? newValue) {
                               setState(() {
-                                _filterMode.value = index;
-                                activeVocabulary =
-                                    null; // Beim Filterwechsel neu auswählen.
+                                _selectedGroup = newValue!;
+                                activeVocabulary = null;
                                 quizState = QuizState.waitingForAnswer;
-                                showExample = false;
                                 _inputEnabled = true;
                                 answerController.clear();
                               });
                             },
+                            items: <String>['Alle', ...groups]
+                                .map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
                           ),
-                          const SizedBox(height: 8),
-                          // Anzeige der Abfrage-Statistiken für die aktuelle Vokabel:
-                          Text(
-                            'Abgefragt: ${currentVoc.answerCount}    Richtig: ${askGerman ? currentVoc.deToEnCounter : currentVoc.enToDeCounter}',
-                            style: Theme.of(context).textTheme.bodyMedium,
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Expanded(
-                                  child: QuestionContainer(
-                                      questionText: questionText)),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          ExampleTextWidget(
-                            exampleText: exampleText,
-                            textStyle: exampleStyle,
-                            isEmptyExample: noExample,
-                            askGerman: askGerman,
-                          ),
-                          const SizedBox(height: 20),
-                          InputFieldContainer(
-                            controller: answerController,
-                            focusNode: _focusNode,
-                            enabled: _inputEnabled,
-                            borderColor: inputBorderColor,
-                            onSubmitted: (value) {
-                              if (!_inputEnabled) {
-                                _nextQuestion();
-                              } else {
-                                _handleAnswer();
-                              }
-                            },
-                            textStyle: Theme.of(context)
-                                .textTheme
-                                .headlineSmall
-                                ?.copyWith(
-                                  color: showExample
-                                      ? (quizState == QuizState.correctAnswer
-                                          ? Colors.green
-                                          : Colors.red)
-                                      : Colors.black,
-                            ),
-                          ),
-                          if (showExample && quizState == QuizState.correctAnswer)
-                            SubmittedAnswerContainer(
-                              answerText: answerController.text,
-                              borderColor: inputBorderColor,
-                            ),
-                          if (showExample && quizState == QuizState.wrongAnswer)
-                            WrongAnswerContainer(expectedAnswer: expectedAnswer),
-                          if (showExample)
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: AutoSizeText(
-                                'Beispielsatz (${askGerman ? "Englisch" : "Deutsch"}):\n${(askGerman ? currentVoc.englishSentence : currentVoc.germanSentence).trim().isEmpty ? (askGerman ? "no text available" : "kein text vorhanden") : (askGerman ? currentVoc.englishSentence : currentVoc.germanSentence)}',
-                                style: ((askGerman
-                                            ? currentVoc.englishSentence
-                                            : currentVoc.germanSentence)
-                                        .trim()
-                                        .isEmpty)
-                                    ? Theme.of(context)
-                                        .textTheme
-                                        .bodyLarge!
-                                        .copyWith(fontStyle: FontStyle.italic)
-                                    : Theme.of(context).textTheme.bodyLarge,
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          if (showExample)
-                            SpeakButtonsRow(
-                              onSpeakVocabulary: _speakEnglish,
-                              onSpeakSentence: _speakEnglishSentence,
-                            ),
                         ],
                       ),
                     ),
-                  ),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16.0),
-                    child: ActionButton(
-                      text: showExample
-                          ? 'Nächste Vokabel'
-                          : 'Antwort überprüfen',
-                      onPressed: showExample ? _nextQuestion : _handleAnswer,
+                    // Statusbar, die jetzt auch den Gruppenfilter berücksichtigt
+                    StatusBar(
+                      stats: stats,
+                      darkMode: darkMode,
+                      selectedFilterIndex: _filterMode.value,
+                      onFilterSelected: (int index) {
+                        setState(() {
+                          _filterMode.value = index;
+                          activeVocabulary = null;
+                          quizState = QuizState.waitingForAnswer;
+                          showExample = false;
+                          _inputEnabled = true;
+                          answerController.clear();
+                        });
+                      },
                     ),
-                  ),
-                ],
-              );
-            },
+                    const SizedBox(height: 8),
+                    Text(
+                      'Abgefragt: ${currentVoc.answerCount}    Richtig: ${askGerman ? currentVoc.deToEnCounter : currentVoc.enToDeCounter}',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                            child:
+                                QuestionContainer(questionText: questionText)),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    ExampleTextWidget(
+                      exampleText: exampleText,
+                      textStyle: exampleStyle,
+                      isEmptyExample: noExample,
+                      askGerman: askGerman,
+                    ),
+                    const SizedBox(height: 20),
+                    InputFieldContainer(
+                      controller: answerController,
+                      focusNode: _focusNode,
+                      enabled: _inputEnabled,
+                      borderColor: inputBorderColor,
+                      onSubmitted: (value) {
+                        if (!_inputEnabled) {
+                          _nextQuestion();
+                        } else {
+                          _handleAnswer();
+                        }
+                      },
+                      textStyle:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                color: showExample
+                                    ? (quizState == QuizState.correctAnswer
+                                        ? Colors.green
+                                        : Colors.red)
+                                    : Colors.black,
+                              ),
+                    ),
+                    if (showExample && quizState == QuizState.correctAnswer)
+                      SubmittedAnswerContainer(
+                        answerText: answerController.text,
+                        borderColor: inputBorderColor,
+                      ),
+                    if (showExample && quizState == QuizState.wrongAnswer)
+                      WrongAnswerContainer(expectedAnswer: expectedAnswer),
+                    if (showExample)
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: AutoSizeText(
+                          'Beispielsatz (${askGerman ? "Englisch" : "Deutsch"}):\n${(askGerman ? currentVoc.englishSentence : currentVoc.germanSentence).trim().isEmpty ? (askGerman ? "no text available" : "kein text vorhanden") : (askGerman ? currentVoc.englishSentence : currentVoc.germanSentence)}',
+                          style: ((askGerman
+                                      ? currentVoc.englishSentence
+                                      : currentVoc.germanSentence)
+                                  .trim()
+                                  .isEmpty)
+                              ? Theme.of(context)
+                                  .textTheme
+                                  .bodyLarge!
+                                  .copyWith(fontStyle: FontStyle.italic)
+                              : Theme.of(context).textTheme.bodyLarge,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    if (showExample)
+                      SpeakButtonsRow(
+                        onSpeakVocabulary: _speakEnglish,
+                        onSpeakSentence: _speakEnglishSentence,
+                      ),
+                  ],
+                );
+              },
+            ),
           ),
+        ),
+      ),
+      // ActionButton im bottomNavigationBar sorgt dafür, dass er immer unten bleibt.
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: ActionButton(
+          text: showExample ? 'Nächste Vokabel' : 'Antwort überprüfen',
+          onPressed: showExample ? _nextQuestion : _handleAnswer,
         ),
       ),
     );

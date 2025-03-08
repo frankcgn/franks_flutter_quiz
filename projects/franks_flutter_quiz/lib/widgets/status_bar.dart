@@ -34,7 +34,7 @@ class StatusBar extends StatelessWidget {
       buttonWidgets.add(
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            padding: const EdgeInsets.symmetric(horizontal: 2.0),
             child: ElevatedButton(
               onPressed: isDisabled
                   ? null

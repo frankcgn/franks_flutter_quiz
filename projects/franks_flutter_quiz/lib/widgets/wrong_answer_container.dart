@@ -9,7 +9,7 @@ class WrongAnswerContainer extends StatelessWidget {
   const WrongAnswerContainer({
     super.key,
     required this.expectedAnswer,
-    this.height = 60.0,
+    this.height = 30.0,
   });
 
   @override

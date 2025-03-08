@@ -10,7 +10,7 @@ class ActionButton extends StatelessWidget {
     super.key,
     required this.text,
     required this.onPressed,
-    this.height = 60.0,
+    this.height = 35.0,
   });
 
   @override

@@ -11,7 +11,7 @@ class SubmittedAnswerContainer extends StatelessWidget {
     super.key,
     required this.answerText,
     required this.borderColor,
-    this.height = 60.0,
+    this.height = 30.0,
   });
 
   @override
