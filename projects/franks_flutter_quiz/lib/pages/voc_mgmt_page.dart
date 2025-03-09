@@ -222,7 +222,7 @@ class _VocabularyManagementPageState
                       labelText: 'Beispielsatz Englisch',
                       border: OutlineInputBorder(),
                     ),
-                    onChanged: (value) => editedEnglishSentence = value ?? '',
+                    onChanged: (value) => editedEnglishSentence = value,
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
@@ -231,7 +231,7 @@ class _VocabularyManagementPageState
                       labelText: 'Beispielsatz Deutsch',
                       border: OutlineInputBorder(),
                     ),
-                    onChanged: (value) => editedGermanSentence = value ?? '',
+                    onChanged: (value) => editedGermanSentence = value,
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
@@ -287,7 +287,7 @@ class _VocabularyManagementPageState
         widget.vocabularies[idx] = updatedVoc;
       });
       widget.onUpdate(updatedVoc);
-      print('Updated vocabulary with uuid: ${updatedVoc.uuid}');
+      debugPrint('Updated vocabulary with uuid: ${updatedVoc.uuid}');
     }
   }
 
@@ -300,7 +300,7 @@ class _VocabularyManagementPageState
     setState(() {
       widget.vocabularies.removeAt(originalIndex);
     });
-    print('Deleted vocabulary with uuid: $uuid');
+    debugPrint('Deleted vocabulary with uuid: $uuid');
   }
 
   @override
@@ -312,6 +312,14 @@ class _VocabularyManagementPageState
         .toSet()
         .toList();
     groups.sort();
+
+    // Wenn der aktuell gespeicherte Filterwert nicht in der Liste enthalten ist,
+    // setze stattdessen "Alle".
+    if (groups.contains(Provider.of<GlobalState>(context).selectedGroup)) {
+      Provider.of<GlobalState>(context).selectedGroup;
+    } else {
+      Provider.of<GlobalState>(context, listen: false).setSelectedGroup('Alle');
+    }
 
     // Filtere die Vokabelliste anhand des Suchbegriffs und des Gruppenfilters.
     List<Vocabulary> filteredVocabs = widget.vocabularies.where((voc) {
@@ -343,13 +351,7 @@ class _VocabularyManagementPageState
                 const Text('Gruppe:'),
                 DropdownButton<String>(
                   isExpanded: true,
-                  //value: _selectedGroupRestorable.value,
                   value: Provider.of<GlobalState>(context).selectedGroup,
-                  // onChanged: (String? newValue) {
-                  // setState(() {
-                  //   _selectedGroupRestorable.value = newValue ?? 'Alle';
-                  // });
-                  // },
                   onChanged: (String? newValue) {
                     if (newValue != null) {
                       Provider.of<GlobalState>(context, listen: false)
