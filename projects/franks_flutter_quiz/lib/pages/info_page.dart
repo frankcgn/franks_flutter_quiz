@@ -1,36 +1,22 @@
 // pages/info_page.dart
 import 'package:flutter/material.dart';
 
-import '../models/appSettings.dart';
-import 'home_page.dart';
-
 class InfoPage extends StatefulWidget {
-  final AppSettings settings;
-  final Function(AppSettings) onSettingsChanged;
-
-  const InfoPage(
-      {super.key, required this.settings, required this.onSettingsChanged});
+  const InfoPage({Key? key}) : super(key: key);
 
   @override
   _InfoPageState createState() => _InfoPageState();
 }
 
 class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
-  void _navigateToHome() {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => HomePage(
-          settings: widget.settings,
-          onSettingsChanged: widget.onSettingsChanged,
-        ),
-      ),
-    );
+  void _navigate() {
+    Navigator.pushReplacementNamed(context, '/home');
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: _navigateToHome,
+      onTap: _navigate,
       child: Scaffold(
         backgroundColor: Colors.blue,
         body: Center(
