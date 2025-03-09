@@ -329,8 +329,8 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
                       ),
                     ),
                     // Statusbar, die nun auch den Gruppenfilter berücksichtigt
-                    StatusBar(
-                      stats: stats,
+                    LevelStatusBar(
+                      levelCounter: stats,
                       darkMode: darkMode,
                       selectedFilterIndex: _filterMode.value,
                       onFilterSelected: (int index) {

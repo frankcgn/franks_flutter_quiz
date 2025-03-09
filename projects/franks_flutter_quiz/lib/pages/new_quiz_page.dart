@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 import '../models/appSettings.dart';
 import '../models/global_state.dart';
 import '../models/vocabulary.dart';
-import '../widgets/action_button2.dart';
+import '../widgets/action_button3.dart';
 import '../widgets/flag_helper_widget.dart';
 import '../widgets/input_field_container.dart';
 import '../widgets/status_bar.dart';
@@ -134,7 +134,7 @@ class _NewQuizPageState extends State<NewQuizPage> with RestorationMixin {
     return activeVocabulary;
   }
 
-  Map<String, int> _computeStats() {
+  Map<String, int> _computeLevels() {
     final int total = filteredVocabs.length;
     int count0 = 0, count1_2 = 0, count3_4 = 0, countAbove4 = 0;
     for (var voc in filteredVocabs) {
@@ -243,7 +243,7 @@ class _NewQuizPageState extends State<NewQuizPage> with RestorationMixin {
     }).toList();
     filteredVocabs.sort((a, b) => a.german.compareTo(b.german));
 
-    final Map<String, int> stats = _computeStats();
+    final Map<String, int> levels = _computeLevels();
 
     return Scaffold(
       body: Column(
@@ -284,11 +284,11 @@ class _NewQuizPageState extends State<NewQuizPage> with RestorationMixin {
               ],
             ),
           ),
-          // Statusinformationen (z.B. gruppierte Anzeige der richtigen Antworten)
+          // Levelinformationen (z.B. gruppierte Anzeige der richtigen Antworten)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-            child: StatusBar(
-              stats: stats,
+            child: LevelStatusBar(
+              levelCounter: levels,
               darkMode: widget.settings.darkMode,
               selectedFilterIndex: _filterMode.value,
               onFilterSelected: (int index) {
@@ -483,7 +483,7 @@ class _NewQuizPageState extends State<NewQuizPage> with RestorationMixin {
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: ActionButton2(
+        child: ActionButton3(
           text: showExample ? 'Nächste Vokabel' : 'Antwort überprüfen',
           onPressed: showExample ? _nextQuestion : _handleAnswer,
         ),
