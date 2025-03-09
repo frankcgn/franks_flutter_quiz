@@ -4,9 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ae404f1f-f59e-4b7d-9848-53b6e9597e58" name="Changes" comment="flaggen vor text und expand funktion">
+    <list default="true" id="ae404f1f-f59e-4b7d-9848-53b6e9597e58" name="Changes" comment="vokabel_management optimiert">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/ios/Podfile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/ios/Podfile.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/home_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/home_page.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/quiz_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/quiz_page.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/voc_mgmt_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/voc_mgmt_page.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/widgets/flag_helper_widget.dart" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/widgets/flag_helper_widget.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/pubspec.lock" afterDir="false" />
@@ -106,7 +108,7 @@
       <workItem from="1740218753594" duration="5369000" />
       <workItem from="1740236004224" duration="659000" />
       <workItem from="1740236692458" duration="71612000" />
-      <workItem from="1741423142874" duration="71099000" />
+      <workItem from="1741423142874" duration="77453000" />
     </task>
     <task id="LOCAL-00001" summary="Model angepasst">
       <option name="closed" value="true" />
@@ -276,7 +278,15 @@
       <option name="project" value="LOCAL" />
       <updated>1741543450236</updated>
     </task>
-    <option name="localTasksCounter" value="22" />
+    <task id="LOCAL-00022" summary="vokabel_management optimiert">
+      <option name="closed" value="true" />
+      <created>1741546510454</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1741546510454</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -312,7 +322,8 @@
     <MESSAGE value="login und register page hinzugefügt - pagerouting in main verbessert" />
     <MESSAGE value="back button disablen und flags hinzufügen" />
     <MESSAGE value="flaggen vor text und expand funktion" />
-    <option name="LAST_COMMIT_MESSAGE" value="flaggen vor text und expand funktion" />
+    <MESSAGE value="vokabel_management optimiert" />
+    <option name="LAST_COMMIT_MESSAGE" value="vokabel_management optimiert" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
@@ -331,7 +342,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="Dart">
           <url>file://$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/voc_mgmt_page.dart</url>
-          <line>456</line>
+          <line>458</line>
           <option name="timeStamp" value="4" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="Dart">

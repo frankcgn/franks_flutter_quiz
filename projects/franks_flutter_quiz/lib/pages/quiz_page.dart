@@ -54,9 +54,6 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
   // Neuer Filtermode (z.B. basierend auf der Anzahl richtiger Antworten)
   final RestorableInt _filterMode = RestorableInt(0);
 
-  // Neuer State für den Gruppenfilter – "Alle" zeigt alle Gruppen an.
-  //String _selectedGroup = 'Alle';
-
   // Suchbegriff
   String _searchQuery = '';
 
@@ -192,23 +189,9 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
     }
   }
 
-  Future<void> _speakEnglish() async {
-    final Vocabulary? voc = currentVocabulary;
-    if (voc == null) return;
-    await flutterTts.setLanguage("en-US");
-    await flutterTts.speak(voc.english);
-  }
-
   Future<void> _speakEnglishText(String text) async {
     await flutterTts.setLanguage("en-US");
     await flutterTts.speak(text);
-  }
-
-  Future<void> _speakEnglishSentence() async {
-    final Vocabulary? voc = currentVocabulary;
-    if (voc == null) return;
-    await flutterTts.setLanguage("en-US");
-    await flutterTts.speak(voc.englishSentence);
   }
 
   void _handleAnswer() {

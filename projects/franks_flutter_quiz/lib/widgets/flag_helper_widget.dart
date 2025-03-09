@@ -84,6 +84,51 @@ class FlagHelper {
     );
   }
 
+  static Widget buildFlagTextRowWithSpeakerLongPress(
+    String text,
+    String? flagAsset,
+    String language, {
+    double leftPadding = 16.0,
+    required Function(String, String) onLongPress,
+  }) {
+    // Erstelle eine Liste der Widgets, die in der Zeile erscheinen sollen.
+    final List<Widget> rowChildren = [];
+
+    if (flagAsset != null && flagAsset.isNotEmpty) {
+      rowChildren.add(
+        Image.asset(
+          flagAsset,
+          width: 24,
+          height: 24,
+        ),
+      );
+      rowChildren.add(const SizedBox(width: 4));
+    }
+
+    rowChildren.add(
+      Expanded(
+        child: Text(
+          text,
+          style: const TextStyle(fontSize: 16),
+          softWrap: true,
+        ),
+      ),
+    );
+
+    return GestureDetector(
+      onLongPress: () => onLongPress(text, language),
+      child: Container(
+        padding: EdgeInsets.only(left: leftPadding),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          // Flagge und Text oben ausgerichtet
+          mainAxisSize: MainAxisSize.min,
+          children: rowChildren,
+        ),
+      ),
+    );
+  }
+
   static Future<void> _speakText(String text, String language) async {
     await flutterTts.setLanguage(language);
     await flutterTts.speak(text);
