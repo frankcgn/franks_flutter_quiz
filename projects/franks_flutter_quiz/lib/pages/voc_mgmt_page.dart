@@ -318,10 +318,6 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
     filteredVocabs.sort((a, b) => a.german.compareTo(b.german));
 
     return Scaffold(
-      // appBar: AppBar(
-      //   automaticallyImplyLeading: false,
-      //title: const SizedBox.shrink(),
-      // ),
       body: Column(
         children: [
           // Dropdown für den Gruppenfilter
@@ -360,10 +356,10 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
             child: TextField(
               decoration: const InputDecoration(
                 labelText: 'Suche (Deutsch oder Englisch)',
-                filled: true,
-                fillColor: Colors.grey,
-                //border: OutlineInputBorder(),
-                border: InputBorder.none,
+                // filled: true,
+                // fillColor: Colors.grey,
+                border: OutlineInputBorder(),
+                // border: InputBorder.none,
                 prefixIcon: Icon(Icons.search),
               ),
               onChanged: (value) {

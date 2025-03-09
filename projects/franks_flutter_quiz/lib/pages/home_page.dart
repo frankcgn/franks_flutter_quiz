@@ -4,9 +4,11 @@ import 'package:flutter_test_01/services/database_service.dart';
 
 import '../models/appSettings.dart';
 import '../models/vocabulary.dart';
-import 'quiz_page.dart';
-import 'settings_page.dart';
-import 'voc_mgmt_page.dart';
+import '../pages/grammar_page.dart';
+import '../pages/new_quiz_page.dart';
+import '../pages/quiz_page.dart';
+import '../pages/settings_page.dart';
+import '../pages/voc_mgmt_page.dart';
 
 class HomePage extends StatefulWidget {
   final AppSettings settings;
@@ -77,6 +79,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             setState(() {});
           },
         ),
+        NewQuizPage(
+          vocabularies: vocabularies,
+          settings: widget.settings,
+          onUpdate: (Vocabulary updateVoc) {
+            // Beispiel: Eine vorhandene Vocabulary ändern
+            DatabaseService().updateVocabulary(updateVoc.uuid, updateVoc);
+          },
+          quizGerman: quizGerman,
+        ),
         QuizPage(
           vocabularies: vocabularies,
           settings: widget.settings,
@@ -86,6 +97,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           },
           quizGerman: quizGerman,
         ),
+        GrammarPage(),
         SettingsPage(
           settings: widget.settings,
           onSettingsChanged: widget.onSettingsChanged,
@@ -115,10 +127,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               onDestinationSelected: _onItemTapped,
               destinations: [
                 const NavigationDestination(
-                    icon: Icon(Icons.list), label: 'Vokabeln'),
+                    icon: Icon(Icons.list), label: 'Liste'),
+                NavigationDestination(
+                    icon: const Icon(Icons.flash_on),
+                    label: quizGerman ? 'Deu-Eng' : 'Eng-Deu'),
                 NavigationDestination(
                     icon: const Icon(Icons.quiz),
                     label: quizGerman ? 'Deu-Eng' : 'Eng-Deu'),
+                const NavigationDestination(
+                    icon: Icon(Icons.book), label: 'Grammar'),
                 const NavigationDestination(
                     icon: Icon(Icons.settings), label: 'Einstellungen'),
               ],

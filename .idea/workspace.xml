@@ -4,13 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ae404f1f-f59e-4b7d-9848-53b6e9597e58" name="Changes" comment="vokabel_management optimiert">
+    <list default="true" id="ae404f1f-f59e-4b7d-9848-53b6e9597e58" name="Changes" comment="zwischenergebnis new_quiz_page">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/ios/Podfile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/ios/Podfile.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/home_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/home_page.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/quiz_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/quiz_page.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/new_quiz_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/new_quiz_page.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/voc_mgmt_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/voc_mgmt_page.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/widgets/flag_helper_widget.dart" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/widgets/flag_helper_widget.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/pubspec.lock" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -53,7 +52,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    "Flutter.main.dart.executor": "Run",
+    "Flutter.main.dart.executor": "Debug",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "dart.analysis.tool.window.visible": "false",
@@ -108,7 +107,7 @@
       <workItem from="1740218753594" duration="5369000" />
       <workItem from="1740236004224" duration="659000" />
       <workItem from="1740236692458" duration="71612000" />
-      <workItem from="1741423142874" duration="77453000" />
+      <workItem from="1741423142874" duration="81865000" />
     </task>
     <task id="LOCAL-00001" summary="Model angepasst">
       <option name="closed" value="true" />
@@ -286,7 +285,15 @@
       <option name="project" value="LOCAL" />
       <updated>1741546510454</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="zwischenergebnis new_quiz_page">
+      <option name="closed" value="true" />
+      <created>1741553120991</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1741553120991</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -323,7 +330,8 @@
     <MESSAGE value="back button disablen und flags hinzufügen" />
     <MESSAGE value="flaggen vor text und expand funktion" />
     <MESSAGE value="vokabel_management optimiert" />
-    <option name="LAST_COMMIT_MESSAGE" value="vokabel_management optimiert" />
+    <MESSAGE value="zwischenergebnis new_quiz_page" />
+    <option name="LAST_COMMIT_MESSAGE" value="zwischenergebnis new_quiz_page" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
