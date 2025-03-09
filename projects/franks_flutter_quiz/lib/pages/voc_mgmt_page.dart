@@ -85,14 +85,6 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
                   const SizedBox(height: 12),
                   TextFormField(
                     decoration: const InputDecoration(
-                      labelText: 'Beispielsatz Englisch',
-                      border: OutlineInputBorder(),
-                    ),
-                    onSaved: (value) => _englishSentence = value ?? '',
-                  ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    decoration: const InputDecoration(
                       labelText: 'Beispielsatz Deutsch',
                       border: OutlineInputBorder(),
                     ),
@@ -101,10 +93,18 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
                   const SizedBox(height: 12),
                   TextFormField(
                     decoration: const InputDecoration(
-                      labelText: 'Gruppe (optional)',
+                      labelText: 'Beispielsatz Englisch',
                       border: OutlineInputBorder(),
                     ),
-                    onSaved: (value) => _group = value ?? '',
+                    onSaved: (value) => _englishSentence = value ?? '',
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      labelText: 'Gruppe',
+                      border: OutlineInputBorder(),
+                    ),
+                    onSaved: (value) => _group = value ?? 'neu',
                   ),
                 ],
               ),
@@ -143,7 +143,7 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
     );
   }
 
-  /// Öffnet den Edit-Dialog für das ausgewählte Vocabulary.
+  /// Öffnet den Edit-Dialog für die ausgewählte Vokabel.
   void _showEditDialogForVocabulary(Vocabulary voc) {
     int originalIndex =
         widget.vocabularies.indexWhere((v) => v.uuid == voc.uuid);
@@ -199,15 +199,6 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
-                    initialValue: originalVoc.englishSentence,
-                    decoration: const InputDecoration(
-                      labelText: 'Beispielsatz Englisch',
-                      border: OutlineInputBorder(),
-                    ),
-                    onChanged: (value) => editedEnglishSentence = value,
-                  ),
-                  const SizedBox(height: 12),
-                  TextFormField(
                     initialValue: originalVoc.germanSentence,
                     decoration: const InputDecoration(
                       labelText: 'Beispielsatz Deutsch',
@@ -217,9 +208,18 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
+                    initialValue: originalVoc.englishSentence,
+                    decoration: const InputDecoration(
+                      labelText: 'Beispielsatz Englisch',
+                      border: OutlineInputBorder(),
+                    ),
+                    onChanged: (value) => editedEnglishSentence = value,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
                     initialValue: originalVoc.group ?? '',
                     decoration: const InputDecoration(
-                      labelText: 'Gruppe (optional)',
+                      labelText: 'Gruppe',
                       border: OutlineInputBorder(),
                     ),
                     onChanged: (value) => editedGroup = value,
@@ -285,11 +285,6 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
     debugPrint('Deleted vocabulary with uuid: $uuid');
   }
 
-  Future<void> _speakText(String text, String language) async {
-    await flutterTts.setLanguage(language);
-    await flutterTts.speak(text);
-  }
-
   @override
   Widget build(BuildContext context) {
     // Ermitteln aller vorhandenen Gruppen
@@ -323,35 +318,38 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
     filteredVocabs.sort((a, b) => a.german.compareTo(b.german));
 
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: const SizedBox.shrink(),
-      ),
+      // appBar: AppBar(
+      //   automaticallyImplyLeading: false,
+      //title: const SizedBox.shrink(),
+      // ),
       body: Column(
         children: [
           // Dropdown für den Gruppenfilter
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
                 const Text('Gruppe:'),
-                DropdownButton<String>(
-                  isExpanded: true,
-                  value: Provider.of<GlobalState>(context).selectedGroup,
-                  onChanged: (String? newValue) {
-                    if (newValue != null) {
-                      Provider.of<GlobalState>(context, listen: false)
-                          .setSelectedGroup(newValue);
-                    }
-                  },
-                  items: <String>['Alle', ...groups]
-                      .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
+                const SizedBox(width: 8),
+                // Kleiner Abstand zwischen Label und Dropdown
+                Expanded(
+                  child: DropdownButton<String>(
+                    isExpanded: true,
+                    value: Provider.of<GlobalState>(context).selectedGroup,
+                    onChanged: (String? newValue) {
+                      if (newValue != null) {
+                        Provider.of<GlobalState>(context, listen: false)
+                            .setSelectedGroup(newValue);
+                      }
+                    },
+                    items: <String>['Alle', ...groups]
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  ),
                 ),
               ],
             ),
@@ -362,7 +360,10 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
             child: TextField(
               decoration: const InputDecoration(
                 labelText: 'Suche (Deutsch oder Englisch)',
-                border: OutlineInputBorder(),
+                filled: true,
+                fillColor: Colors.grey,
+                //border: OutlineInputBorder(),
+                border: InputBorder.none,
                 prefixIcon: Icon(Icons.search),
               ),
               onChanged: (value) {
@@ -407,13 +408,13 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // Zeile mit deutscher Vokabel, Flagge und Speaker
+                            // Zeile mit deutscher Vokabel (Flagge und Text mit LongPress zum Vorlesen)
                             FlagHelper.buildFlagTextRowWithSpeaker(
                               voc.german,
                               'assets/flags/de.jpg',
                               'de-DE',
                             ),
-                            // Zeile mit englischer Vokabel, Flagge und Speaker
+                            // Zeile mit englischer Vokabel (Flagge und Text mit LongPress zum Vorlesen)
                             FlagHelper.buildFlagTextRowWithSpeaker(
                               voc.english,
                               'assets/flags/en.jpg',
@@ -422,7 +423,7 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
                           ],
                         ),
                         children: [
-                          // Divider, der nur 75% der Breite einnimmt und von links beginnt
+                          // Divider: 75 % der Breite, links ausgerichtet
                           FractionallySizedBox(
                             widthFactor: 0.75,
                             alignment: Alignment.centerLeft,
@@ -435,18 +436,18 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                // Englischer Beispielsatz mit Flagge und Speaker
-                                FlagHelper.buildFlagTextRowWithSpeaker(
-                                  voc.englishSentence,
-                                  'assets/flags/en.jpg',
-                                  'en-US',
-                                ),
-                                const SizedBox(height: 1),
-                                // Deutscher Beispielsatz mit Flagge und Speaker
+                                // Deutscher Beispielsatz (Flagge und LongPress)
                                 FlagHelper.buildFlagTextRowWithSpeaker(
                                   voc.germanSentence,
                                   'assets/flags/de.jpg',
                                   'de-DE',
+                                ),
+                                const SizedBox(height: 1),
+                                // Englischer Beispielsatz (Flagge und LongPress)
+                                FlagHelper.buildFlagTextRowWithSpeaker(
+                                  voc.englishSentence,
+                                  'assets/flags/en.jpg',
+                                  'en-US',
                                 ),
                               ],
                             ),
