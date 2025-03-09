@@ -6,10 +6,13 @@ import 'package:provider/provider.dart';
 
 import '../models/appSettings.dart';
 import '../models/global_state.dart';
+import '../models/vocabulary.dart';
 import '../pages/home_page.dart';
 import '../pages/info_page.dart';
 import '../pages/login_page.dart';
+import '../pages/quiz_page.dart';
 import '../pages/register_page.dart';
+import '../pages/voc_mgmt_page.dart';
 import 'firebase_options.dart';
 import 'services/settings_storage.dart';
 
@@ -29,7 +32,7 @@ void main() async {
       .collection('vocabularies')
       .snapshots()
       .listen((snapshot) {
-    print("Snapshot updated: ${snapshot.docs.length} Dokumente");
+    debugPrint("Snapshot updated: ${snapshot.docs.length} Dokumente");
     // Hier kannst du weitere Logik einbauen, z.B. Datenverarbeitung oder globales State-Management.
   });
   runApp(
@@ -50,21 +53,23 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   AppSettings settings = AppSettings();
   bool settingsLoaded = false;
-  bool userAutorized = false;
+  bool userAutorized = true;
+  final List<Vocabulary> vocabularies = [];
+  final bool quizGerman = true;
 
   @override
   void initState() {
     super.initState();
     _loadSettings();
   }
-  
+
   Future<void> _loadSettings() async {
     settings = await SettingsStorage.loadSettings();
     setState(() {
       settingsLoaded = true;
     });
   }
-  
+
   void updateSettings(AppSettings newSettings) {
     setState(() {
       settings = newSettings;
@@ -74,16 +79,6 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    // if (!settingsLoaded) {
-    //   return MaterialApp(
-    //     restorationScopeId: 'app',
-    //     title: 'Vokabel Trainer',
-    //     home: Scaffold(
-    //       body: Center(child: CircularProgressIndicator()),
-    //     ),
-    //   );
-    // }
-
     if (!settingsLoaded) {
       _loadSettings();
     }
@@ -100,7 +95,7 @@ class _MyAppState extends State<MyApp> {
           );
 
     return MaterialApp(
-      title: 'Vokabel Trainer',
+      title: 'Julias Vokabel Trainer',
       theme: theme,
       restorationScopeId: 'app',
       // gleichbleibender Restoration Scope
@@ -142,9 +137,32 @@ class _MyAppState extends State<MyApp> {
               builder: (context) => SettingsPage(
                   settings: this.settings, onSettingsChanged: updateSettings),
             );
+          case '/quiz':
+            final args = routeSettings.arguments as Map<String, dynamic>? ?? {};
+            return MaterialPageRoute(
+              builder: (context) => QuizPage(
+                vocabularies: args['vocabularies'] ?? vocabularies,
+                settings: args['settings'] ?? settings,
+                onUpdate: args['onUpdate'] ?? (Vocabulary voc) {},
+                quizGerman: args['quizGerman'] ?? quizGerman,
+              ),
+            );
+          case '/voc_mgmt':
+            final args = routeSettings.arguments as Map<String, dynamic>? ?? {};
+            return MaterialPageRoute(
+              builder: (context) => VocabularyManagementPage(
+                vocabularies: args['vocabularies'] ?? vocabularies,
+                onInsert: args['onInsert'] ?? (Vocabulary voc) {},
+                onUpdate: args['onUpdate'] ?? (Vocabulary voc) {},
+                onDelete: args['onDelete'] ?? (Vocabulary voc) {},
+              ),
+            );
           default:
             return MaterialPageRoute(
               builder: (context) => Scaffold(
+                appBar: AppBar(
+                    automaticallyImplyLeading: false,
+                    title: const Text('Fehler')),
                 body: Center(child: Text('Seite nicht gefunden')),
               ),
             );

@@ -34,7 +34,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     // Wenn die App in den Hintergrund wechselt oder pausiert, speichere alle Änderungen
-    if (state == AppLifecycleState.paused || state == AppLifecycleState.detached) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
       // Hier rufst du deine Funktion zum Speichern der Vokabeln auf.
     }
   }
@@ -44,8 +45,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     vocabularies = await DatabaseService().getCompleteVocabularies();
     print('_loadAllVocabulariesFromFirebase: ${vocabularies.length} - END');
   }
-
-  Future<void> _doNothing() async {}
 
   void _onItemTapped(int index) {
     setState(() {
@@ -63,7 +62,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         VocabularyManagementPage(
           vocabularies: vocabularies,
           onInsert: (Vocabulary newVoc) {
-            // Beispiel: Ein neues Vocabulary einfügen
+            // Beispiel: Eine neue Vocabulary einfügen
             DatabaseService().addVocabulary(newVoc);
             setState(() {});
           },
@@ -107,19 +106,25 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         } else {
           vocabularies = snapshot.data!;
           return Scaffold(
-      appBar: AppBar(title: const Text('Vokabel Trainer')),
-      body: _pages()[_selectedIndex],
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: _onItemTapped,
-        destinations: [
-          const NavigationDestination(icon: Icon(Icons.list), label: 'Vokabeln'),
-          NavigationDestination(icon: const Icon(Icons.quiz), label: quizGerman ? 'Deu-Eng' : 'Eng-Deu'),
-          const NavigationDestination(icon: Icon(Icons.settings), label: 'Einstellungen'),
-        ],
-      ),
-    );
-  }
+            appBar: AppBar(
+                automaticallyImplyLeading: false,
+                title: const Text('Vokabel Trainer')),
+            body: _pages()[_selectedIndex],
+            bottomNavigationBar: NavigationBar(
+              selectedIndex: _selectedIndex,
+              onDestinationSelected: _onItemTapped,
+              destinations: [
+                const NavigationDestination(
+                    icon: Icon(Icons.list), label: 'Vokabeln'),
+                NavigationDestination(
+                    icon: const Icon(Icons.quiz),
+                    label: quizGerman ? 'Deu-Eng' : 'Eng-Deu'),
+                const NavigationDestination(
+                    icon: Icon(Icons.settings), label: 'Einstellungen'),
+              ],
+            ),
+          );
+        }
       },
     );
   }

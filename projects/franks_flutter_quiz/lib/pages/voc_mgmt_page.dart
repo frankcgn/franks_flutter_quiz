@@ -6,6 +6,7 @@ import 'package:uuid/uuid.dart';
 
 import '../models/global_state.dart';
 import '../models/vocabulary.dart';
+import '../widgets/flag_helper_widget.dart';
 
 typedef VocabularyCallback = void Function(Vocabulary voc);
 
@@ -337,9 +338,10 @@ class _VocabularyManagementPageState
     filteredVocabs.sort((a, b) => a.german.compareTo(b.german));
 
     return Scaffold(
-      //  appBar: AppBar(
-      //    title: const Text('Vokabeln verwalten'),
-      //  ),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        // title: const Text('Vokabeln verwalten'),
+      ),
       body: Column(
         children: [
           // Dropdown für den Gruppenfilter (über dem Suchfeld)
@@ -398,9 +400,14 @@ class _VocabularyManagementPageState
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16)),
                   child: ListTile(
-                    title: Text(
-                      '${voc.german}\n${voc.english}',
-                      textAlign: TextAlign.start,
+                    title: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        FlagHelper.buildFlagTextRow(
+                            voc.german, 'assets/flags/de.jpg'),
+                        FlagHelper.buildFlagTextRow(
+                            voc.english, 'assets/flags/en.jpg'),
+                      ],
                     ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,

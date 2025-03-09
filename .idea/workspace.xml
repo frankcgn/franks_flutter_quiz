@@ -4,17 +4,20 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ae404f1f-f59e-4b7d-9848-53b6e9597e58" name="Changes" comment="fix gruppe - wenn das letzte Objekt der Gruppe gelöscht wird">
-      <change afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/models/global_state.dart" afterDir="false" />
+    <list default="true" id="ae404f1f-f59e-4b7d-9848-53b6e9597e58" name="Changes" comment="login und register page hinzugefügt - pagerouting in main verbessert">
+      <change afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/assets/flags/de.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/assets/flags/en.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/widgets/flag_helper_widget.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/assets/vocabulary.csv" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/assets/csv/vocabulary.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/ios/Podfile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/ios/Podfile.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/main.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/info_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/info_page.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/macos/Flutter/GeneratedPluginRegistrant.swift" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/macos/Flutter/GeneratedPluginRegistrant.swift" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/home_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/home_page.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/login_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/login_page.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/register_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/register_page.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/voc_mgmt_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/voc_mgmt_page.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/pubspec.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/pubspec.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/windows/flutter/generated_plugin_registrant.cc" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/windows/flutter/generated_plugin_registrant.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/windows/flutter/generated_plugins.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/windows/flutter/generated_plugins.cmake" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -79,6 +82,8 @@
       <recent name="$PROJECT_DIR$/projects/franks_flutter_quiz/assets/icons" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/projects/franks_flutter_quiz/assets/csv" />
+      <recent name="$PROJECT_DIR$/projects/franks_flutter_quiz/assets/flags" />
       <recent name="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/services" />
       <recent name="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/models" />
     </key>
@@ -109,7 +114,7 @@
       <workItem from="1740218753594" duration="5369000" />
       <workItem from="1740236004224" duration="659000" />
       <workItem from="1740236692458" duration="71612000" />
-      <workItem from="1741423142874" duration="51902000" />
+      <workItem from="1741423142874" duration="62595000" />
     </task>
     <task id="LOCAL-00001" summary="Model angepasst">
       <option name="closed" value="true" />
@@ -255,7 +260,15 @@
       <option name="project" value="LOCAL" />
       <updated>1741480318387</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="login und register page hinzugefügt - pagerouting in main verbessert">
+      <option name="closed" value="true" />
+      <created>1741504994249</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1741504994249</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -288,7 +301,8 @@
     <MESSAGE value="Import fixed" />
     <MESSAGE value="provider für globales setzen der gruppe" />
     <MESSAGE value="fix gruppe - wenn das letzte Objekt der Gruppe gelöscht wird" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix gruppe - wenn das letzte Objekt der Gruppe gelöscht wird" />
+    <MESSAGE value="login und register page hinzugefügt - pagerouting in main verbessert" />
+    <option name="LAST_COMMIT_MESSAGE" value="login und register page hinzugefügt - pagerouting in main verbessert" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
@@ -297,7 +311,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="Dart">
           <url>file://$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/voc_mgmt_page.dart</url>
-          <line>30</line>
+          <line>32</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="Dart">
@@ -307,22 +321,22 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="Dart">
           <url>file://$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/voc_mgmt_page.dart</url>
-          <line>426</line>
+          <line>432</line>
           <option name="timeStamp" value="4" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="Dart">
           <url>file://$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/voc_mgmt_page.dart</url>
-          <line>47</line>
+          <line>49</line>
           <option name="timeStamp" value="7" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="Dart">
           <url>file://$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/voc_mgmt_page.dart</url>
-          <line>57</line>
+          <line>59</line>
           <option name="timeStamp" value="8" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="Dart">
           <url>file://$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/voc_mgmt_page.dart</url>
-          <line>340</line>
+          <line>343</line>
           <option name="timeStamp" value="11" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="Dart">
@@ -342,13 +356,8 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="Dart">
           <url>file://$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/info_page.dart</url>
-          <line>17</line>
+          <line>13</line>
           <option name="timeStamp" value="24" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="Dart">
-          <url>file://$PROJECT_DIR$/projects/franks_flutter_quiz/lib/main.dart</url>
-          <line>109</line>
-          <option name="timeStamp" value="36" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
