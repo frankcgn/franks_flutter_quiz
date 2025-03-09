@@ -4,8 +4,10 @@ import 'dart:math';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:provider/provider.dart';
 
 import '../models/appSettings.dart';
+import '../models/global_state.dart';
 import '../models/vocabulary.dart';
 import '../widgets/action_button.dart';
 import '../widgets/example_text_widget.dart';
@@ -53,7 +55,7 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
   final RestorableInt _filterMode = RestorableInt(0);
 
   // Neuer State für den Gruppenfilter – "Alle" zeigt alle Gruppen an.
-  String _selectedGroup = 'Alle';
+  //String _selectedGroup = 'Alle';
 
   // Suchbegriff
   String _searchQuery = '';
@@ -106,8 +108,13 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
           return true;
       }
     }).toList();
-    if (_selectedGroup != 'Alle') {
-      list = list.where((voc) => voc.group == _selectedGroup).toList();
+    if (Provider.of<GlobalState>(context).selectedGroup != 'Alle') {
+      list = list
+          .where(
+            (voc) =>
+                voc.group == Provider.of<GlobalState>(context).selectedGroup,
+          )
+          .toList();
     }
     if (_searchQuery.isNotEmpty) {
       list = list.where((voc) {
@@ -313,10 +320,14 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
                           const Text('Gruppe:'),
                           DropdownButton<String>(
                             isExpanded: true,
-                            value: _selectedGroup,
+                            value:
+                                Provider.of<GlobalState>(context).selectedGroup,
                             onChanged: (String? newValue) {
+                              if (newValue != null) {
+                                Provider.of<GlobalState>(context, listen: false)
+                                    .setSelectedGroup(newValue);
+                              }
                               setState(() {
-                                _selectedGroup = newValue!;
                                 activeVocabulary = null;
                                 quizState = QuizState.waitingForAnswer;
                                 _inputEnabled = true;

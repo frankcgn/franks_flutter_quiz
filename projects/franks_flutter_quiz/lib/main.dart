@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../models/appSettings.dart';
+import '../models/global_state.dart';
 import 'firebase_options.dart';
 import 'pages/info_page.dart';
 import 'services/settings_storage.dart';
@@ -26,7 +28,12 @@ void main() async {
     print("Snapshot updated: ${snapshot.docs.length} Dokumente");
     // Hier kannst du weitere Logik einbauen, z.B. Datenverarbeitung oder globales State-Management.
   });
-  runApp(MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => GlobalState(),
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatefulWidget {

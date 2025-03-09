@@ -1,8 +1,10 @@
 // voc_mgmt_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
+import '../models/global_state.dart';
 import '../models/vocabulary.dart';
 
 typedef VocabularyCallback = void Function(Vocabulary voc);
@@ -26,8 +28,9 @@ class VocabularyManagementPage extends StatefulWidget {
       _VocabularyManagementPageState();
 }
 
-class _VocabularyManagementPageState extends State<VocabularyManagementPage>
-    with RestorationMixin {
+class _VocabularyManagementPageState
+    extends State<VocabularyManagementPage> //with RestorationMixin
+{
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String _german = '';
   String _english = '';
@@ -38,19 +41,22 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage>
 
   FlutterTts flutterTts = FlutterTts();
 
+  // RestorableSTring ist nur im State gültig und ist damit nicht für die grou geeignet
+  // es funktioniert aber auch nicht.
+
   // Hier wird der RestorableString deklariert:
-  final RestorableString _selectedGroupRestorable = RestorableString('Alle');
+  //final RestorableString _selectedGroupRestorable = RestorableString('Alle');
 
   // Uuid-Generator
   final Uuid uuidGenerator = Uuid();
 
-  @override
-  String? get restorationId => 'voc_mgmt_page';
+  // @override
+  // String? get restorationId => 'voc_mgmt_page';
 
-  @override
-  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
-    registerForRestoration(_selectedGroupRestorable, 'selected_group');
-  }
+  // @override
+  // void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+  //registerForRestoration(_selectedGroupRestorable, 'selected_group');
+  // }
 
   void _showAddDialog() {
     showDialog(
@@ -312,8 +318,10 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage>
       bool matchesSearch =
           voc.german.toLowerCase().contains(_searchQuery.toLowerCase()) ||
               voc.english.toLowerCase().contains(_searchQuery.toLowerCase());
-      bool matchesGroup = _selectedGroupRestorable.value == 'Alle' ||
-          (voc.group != null && voc.group == _selectedGroupRestorable.value);
+      bool matchesGroup =
+          Provider.of<GlobalState>(context).selectedGroup == 'Alle' ||
+              (voc.group != null &&
+                  voc.group == Provider.of<GlobalState>(context).selectedGroup);
       return matchesSearch && matchesGroup;
     }).toList();
 
@@ -335,11 +343,18 @@ class _VocabularyManagementPageState extends State<VocabularyManagementPage>
                 const Text('Gruppe:'),
                 DropdownButton<String>(
                   isExpanded: true,
-                  value: _selectedGroupRestorable.value,
+                  //value: _selectedGroupRestorable.value,
+                  value: Provider.of<GlobalState>(context).selectedGroup,
+                  // onChanged: (String? newValue) {
+                  // setState(() {
+                  //   _selectedGroupRestorable.value = newValue ?? 'Alle';
+                  // });
+                  // },
                   onChanged: (String? newValue) {
-                    setState(() {
-                      _selectedGroupRestorable.value = newValue ?? 'Alle';
-                    });
+                    if (newValue != null) {
+                      Provider.of<GlobalState>(context, listen: false)
+                          .setSelectedGroup(newValue);
+                    }
                   },
                   items: <String>['Alle', ...groups]
                       .map<DropdownMenuItem<String>>((String value) {
