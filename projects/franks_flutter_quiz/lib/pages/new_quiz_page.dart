@@ -325,19 +325,36 @@ class _NewQuizPageState extends State<NewQuizPage> with RestorationMixin {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         // Zeile mit deutscher Vokabel (mit Flagge, Text und LongPress)
-                        FlagHelper.buildFlagTextRowWithSpeakerLongPress(
+                        if (askGerman)
+                          FlagHelper.buildFlagTextRowWithSpeakerLongPress(
                           voc.german,
                           'assets/flags/de.jpg',
                           'de-DE',
                           onLongPress: _speakText,
                         ),
-                        // Zeile mit englischer Vokabel (mit Flagge, Text und LongPress)
+                        if (!askGerman)
+                          FlagHelper.buildFlagTextRowWithSpeakerLongPress(
+                            voc.english,
+                            'assets/flags/en.jpg',
+                            'en-US',
+                            onLongPress: _speakText,
+                          ),
+                        if (askGerman)
+                          // Zeile mit englischer Vokabel (mit Flagge, Text und LongPress)
                         FlagHelper.buildFlagTextRowWithSpeakerLongPress(
                           voc.germanSentence,
                           '',
                           'de-DE',
                           onLongPress: _speakText,
                         ),
+                        if (!askGerman)
+                          // Zeile mit englischer Vokabel (mit Flagge, Text und LongPress)
+                          FlagHelper.buildFlagTextRowWithSpeakerLongPress(
+                            voc.englishSentence,
+                            '',
+                            'en-US',
+                            onLongPress: _speakText,
+                          ),
                       ],
                     ),
                     children: [
@@ -353,21 +370,37 @@ class _NewQuizPageState extends State<NewQuizPage> with RestorationMixin {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // Englischer Beispielsatz (mit Flagge und LongPress)
+                            if (askGerman)
+                              // Englischer Beispielsatz (mit Flagge und LongPress)
                             FlagHelper.buildFlagTextRowWithSpeakerLongPress(
                               voc.english,
                               'assets/flags/en.jpg',
                               'en-US',
                               onLongPress: _speakText,
                             ),
+                            if (!askGerman)
+                              FlagHelper.buildFlagTextRowWithSpeakerLongPress(
+                                voc.german,
+                                'assets/flags/de.jpg',
+                                'de-DE',
+                                onLongPress: _speakText,
+                              ),
                             const SizedBox(height: 1),
-                            // Deutscher Beispielsatz (mit Flagge und LongPress)
+                            if (askGerman)
+                              // Deutscher Beispielsatz (mit Flagge und LongPress)
                             FlagHelper.buildFlagTextRowWithSpeakerLongPress(
                               voc.englishSentence,
                               '',
                               'en-US',
                               onLongPress: _speakText,
                             ),
+                            if (!askGerman)
+                              FlagHelper.buildFlagTextRowWithSpeakerLongPress(
+                                voc.germanSentence,
+                                '',
+                                'de-DE',
+                                onLongPress: _speakText,
+                              ),
                           ],
                         ),
                       ),
