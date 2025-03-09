@@ -29,9 +29,7 @@ class VocabularyManagementPage extends StatefulWidget {
       _VocabularyManagementPageState();
 }
 
-class _VocabularyManagementPageState
-    extends State<VocabularyManagementPage> //with RestorationMixin
-{
+class _VocabularyManagementPageState extends State<VocabularyManagementPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String _german = '';
   String _english = '';
@@ -41,23 +39,7 @@ class _VocabularyManagementPageState
   String _searchQuery = '';
 
   FlutterTts flutterTts = FlutterTts();
-
-  // RestorableSTring ist nur im State gültig und ist damit nicht für die grou geeignet
-  // es funktioniert aber auch nicht.
-
-  // Hier wird der RestorableString deklariert:
-  //final RestorableString _selectedGroupRestorable = RestorableString('Alle');
-
-  // Uuid-Generator
   final Uuid uuidGenerator = Uuid();
-
-  // @override
-  // String? get restorationId => 'voc_mgmt_page';
-
-  // @override
-  // void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
-  //registerForRestoration(_selectedGroupRestorable, 'selected_group');
-  // }
 
   void _showAddDialog() {
     showDialog(
@@ -138,7 +120,6 @@ class _VocabularyManagementPageState
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
                   _formKey.currentState!.save();
-                  // Neue UUID generieren
                   String newUuid = uuidGenerator.v4();
                   Vocabulary voc = Vocabulary(
                     uuid: newUuid,
@@ -162,7 +143,7 @@ class _VocabularyManagementPageState
     );
   }
 
-  /// Öffnet den Edit-Dialog für das übergebene Vocabulary.
+  /// Öffnet den Edit-Dialog für das ausgewählte Vocabulary.
   void _showEditDialogForVocabulary(Vocabulary voc) {
     int originalIndex =
         widget.vocabularies.indexWhere((v) => v.uuid == voc.uuid);
@@ -292,7 +273,7 @@ class _VocabularyManagementPageState
     }
   }
 
-  /// Löscht ein Vocabulary anhand seiner UUID und gibt die UUID aus.
+  /// Löscht ein Vocabulary anhand seiner UUID.
   void _deleteVocabularyByUUID(String uuid) {
     int originalIndex = widget.vocabularies.indexWhere((v) => v.uuid == uuid);
     if (originalIndex < 0) return;
@@ -304,9 +285,14 @@ class _VocabularyManagementPageState
     debugPrint('Deleted vocabulary with uuid: $uuid');
   }
 
+  Future<void> _speakText(String text, String language) async {
+    await flutterTts.setLanguage(language);
+    await flutterTts.speak(text);
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Ermitteln aller vorhandenen Gruppen (ohne leere Werte)
+    // Ermitteln aller vorhandenen Gruppen
     final List<String> groups = widget.vocabularies
         .map((voc) => voc.group ?? '')
         .where((g) => g.isNotEmpty)
@@ -314,15 +300,15 @@ class _VocabularyManagementPageState
         .toList();
     groups.sort();
 
-    // Wenn der aktuell gespeicherte Filterwert nicht in der Liste enthalten ist,
-    // setze stattdessen "Alle".
-    if (groups.contains(Provider.of<GlobalState>(context).selectedGroup)) {
-      Provider.of<GlobalState>(context).selectedGroup;
-    } else {
-      Provider.of<GlobalState>(context, listen: false).setSelectedGroup('Alle');
+    // Falls der globale Filterwert nicht in den Gruppen vorhanden ist, setze ihn auf "Alle".
+    if (!groups.contains(Provider.of<GlobalState>(context).selectedGroup)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Provider.of<GlobalState>(context, listen: false)
+            .setSelectedGroup('Alle');
+      });
     }
 
-    // Filtere die Vokabelliste anhand des Suchbegriffs und des Gruppenfilters.
+    // Filtere die Vokabeln anhand von Suche und Gruppenfilter.
     List<Vocabulary> filteredVocabs = widget.vocabularies.where((voc) {
       bool matchesSearch =
           voc.german.toLowerCase().contains(_searchQuery.toLowerCase()) ||
@@ -334,17 +320,16 @@ class _VocabularyManagementPageState
       return matchesSearch && matchesGroup;
     }).toList();
 
-    // Sortiere die gefilterte Liste alphabetisch nach "german".
     filteredVocabs.sort((a, b) => a.german.compareTo(b.german));
 
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        // title: const Text('Vokabeln verwalten'),
+        title: const SizedBox.shrink(),
       ),
       body: Column(
         children: [
-          // Dropdown für den Gruppenfilter (über dem Suchfeld)
+          // Dropdown für den Gruppenfilter
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: Column(
@@ -387,44 +372,87 @@ class _VocabularyManagementPageState
               },
             ),
           ),
-          // Gefilterte Liste der Vokabeln
+          // Liste der gefilterten Vokabeln
           Expanded(
             child: ListView.builder(
               itemCount: filteredVocabs.length,
               itemBuilder: (context, index) {
                 Vocabulary voc = filteredVocabs[index];
-                return Card(
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  elevation: 3,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16)),
-                  child: ListTile(
-                    title: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        FlagHelper.buildFlagTextRow(
-                            voc.german, 'assets/flags/de.jpg'),
-                        FlagHelper.buildFlagTextRow(
-                            voc.english, 'assets/flags/en.jpg'),
-                      ],
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.edit),
-                          onPressed: () => _showEditDialogForVocabulary(voc),
+                return Dismissible(
+                  key: Key(voc.uuid),
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    color: Colors.red,
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.only(right: 20.0),
+                    child: const Icon(Icons.delete, color: Colors.white),
+                  ),
+                  onDismissed: (direction) {
+                    _deleteVocabularyByUUID(voc.uuid);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Vokabel gelöscht')),
+                    );
+                  },
+                  child: GestureDetector(
+                    onDoubleTap: () => _showEditDialogForVocabulary(voc),
+                    child: Card(
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      elevation: 3,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: ExpansionTile(
+                        title: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Zeile mit deutscher Vokabel, Flagge und Speaker
+                            FlagHelper.buildFlagTextRowWithSpeaker(
+                              voc.german,
+                              'assets/flags/de.jpg',
+                              'de-DE',
+                            ),
+                            // Zeile mit englischer Vokabel, Flagge und Speaker
+                            FlagHelper.buildFlagTextRowWithSpeaker(
+                              voc.english,
+                              'assets/flags/en.jpg',
+                              'en-US',
+                            ),
+                          ],
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.delete),
-                          onPressed: () => _deleteVocabularyByUUID(voc.uuid),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.volume_up, size: 16.0),
-                          onPressed: () => _speakEnglishText(voc.english),
-                        ),
-                      ],
+                        children: [
+                          // Divider, der nur 75% der Breite einnimmt und von links beginnt
+                          FractionallySizedBox(
+                            widthFactor: 0.75,
+                            alignment: Alignment.centerLeft,
+                            child:
+                                const Divider(thickness: 1, color: Colors.grey),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // Englischer Beispielsatz mit Flagge und Speaker
+                                FlagHelper.buildFlagTextRowWithSpeaker(
+                                  voc.englishSentence,
+                                  'assets/flags/en.jpg',
+                                  'en-US',
+                                ),
+                                const SizedBox(height: 1),
+                                // Deutscher Beispielsatz mit Flagge und Speaker
+                                FlagHelper.buildFlagTextRowWithSpeaker(
+                                  voc.germanSentence,
+                                  'assets/flags/de.jpg',
+                                  'de-DE',
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 );
@@ -438,10 +466,5 @@ class _VocabularyManagementPageState
         child: const Icon(Icons.add),
       ),
     );
-  }
-
-  Future<void> _speakEnglishText(String text) async {
-    await flutterTts.setLanguage("en-US");
-    await flutterTts.speak(text);
   }
 }
