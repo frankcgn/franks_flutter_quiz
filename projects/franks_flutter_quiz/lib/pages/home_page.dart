@@ -5,8 +5,8 @@ import 'package:flutter_test_01/services/database_service.dart';
 import '../models/appSettings.dart';
 import '../models/vocabulary.dart';
 import '../pages/grammar_page.dart';
-import '../pages/new_quiz_page.dart';
 import '../pages/quiz_page.dart';
+import '../pages/quiz_page_old_style.dart';
 import '../pages/settings_page.dart';
 import '../pages/voc_mgmt_page.dart';
 
@@ -35,14 +35,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // Wenn die App in den Hintergrund wechselt oder pausiert, speichere alle Änderungen
+    // Speichern, wenn die App pausiert oder in den Hintergrund wechselt.
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached) {
-      // Hier rufst du deine Funktion zum Speichern der Vokabeln auf.
+      // Hier ggf. Speichern-Logik einfügen.
     }
   }
 
-  Future? _loadAllVocabulariesFromFirebase() async {
+  Future<void> _loadAllVocabulariesFromFirebase() async {
     print('_loadAllVocabulariesFromFirebase BEGIN');
     vocabularies = await DatabaseService().getCompleteVocabularies();
     print('_loadAllVocabulariesFromFirebase: ${vocabularies.length} - END');
@@ -59,40 +59,35 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     });
   }
 
-  // Build UI
+  // Generiere die Seitenliste
   List<Widget> _pages() => [
         VocabularyManagementPage(
           vocabularies: vocabularies,
           onInsert: (Vocabulary newVoc) {
-            // Beispiel: Eine neue Vocabulary einfügen
             DatabaseService().addVocabulary(newVoc);
             setState(() {});
           },
           onUpdate: (Vocabulary updateVoc) {
-            // Beispiel: Eine vorhandene Vocabulary ändern
             DatabaseService().updateVocabulary(updateVoc.uuid, updateVoc);
             setState(() {});
           },
           onDelete: (Vocabulary delVoc) {
-            // Beispiel: Eine vorhandene Vocabulary löschen
             DatabaseService().deleteVocabulary(delVoc.uuid);
             setState(() {});
           },
-        ),
-        NewQuizPage(
-          vocabularies: vocabularies,
-          settings: widget.settings,
-          onUpdate: (Vocabulary updateVoc) {
-            // Beispiel: Eine vorhandene Vocabulary ändern
-            DatabaseService().updateVocabulary(updateVoc.uuid, updateVoc);
-          },
-          quizGerman: quizGerman,
         ),
         QuizPage(
           vocabularies: vocabularies,
           settings: widget.settings,
           onUpdate: (Vocabulary updateVoc) {
-            // Beispiel: Eine vorhandene Vocabulary ändern
+            DatabaseService().updateVocabulary(updateVoc.uuid, updateVoc);
+          },
+          quizGerman: quizGerman,
+        ),
+        OldQuizPage(
+          vocabularies: vocabularies,
+          settings: widget.settings,
+          onUpdate: (Vocabulary updateVoc) {
             DatabaseService().updateVocabulary(updateVoc.uuid, updateVoc);
           },
           quizGerman: quizGerman,
@@ -122,23 +117,39 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 automaticallyImplyLeading: false,
                 title: const Text('Vokabel Trainer')),
             body: _pages()[_selectedIndex],
-            bottomNavigationBar: NavigationBar(
-              selectedIndex: _selectedIndex,
-              onDestinationSelected: _onItemTapped,
-              destinations: [
-                const NavigationDestination(
-                    icon: Icon(Icons.list), label: 'Liste'),
-                NavigationDestination(
-                    icon: const Icon(Icons.flash_on),
-                    label: quizGerman ? 'Deu-Eng' : 'Eng-Deu'),
-                NavigationDestination(
-                    icon: const Icon(Icons.quiz),
-                    label: quizGerman ? 'Deu-Eng' : 'Eng-Deu'),
-                const NavigationDestination(
-                    icon: Icon(Icons.book), label: 'Grammar'),
-                const NavigationDestination(
-                    icon: Icon(Icons.settings), label: 'Einstellungen'),
-              ],
+            bottomNavigationBar: Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              // Zusätzlicher Abstand nach unten
+              child: NavigationBarTheme(
+                data: NavigationBarThemeData(
+                  height: 50, // Kleinere Höhe
+                  labelTextStyle: MaterialStateProperty.all(
+                    const TextStyle(
+                        fontSize: 12), // Kleinere Schriftgröße für Labels
+                  ),
+                  iconTheme: MaterialStateProperty.all(
+                    const IconThemeData(size: 20), // Kleinere Icons
+                  ),
+                ),
+                child: NavigationBar(
+                  selectedIndex: _selectedIndex,
+                  onDestinationSelected: _onItemTapped,
+                  destinations: [
+                    const NavigationDestination(
+                        icon: Icon(Icons.list), label: 'Liste'),
+                    NavigationDestination(
+                        icon: const Icon(Icons.flash_on),
+                        label: quizGerman ? 'Deu-Eng' : 'Eng-Deu'),
+                    NavigationDestination(
+                        icon: const Icon(Icons.quiz),
+                        label: quizGerman ? 'Deu-Eng' : 'Eng-Deu'),
+                    const NavigationDestination(
+                        icon: Icon(Icons.book), label: 'Grammar'),
+                    const NavigationDestination(
+                        icon: Icon(Icons.settings), label: 'Einstellungen'),
+                  ],
+                ),
+              ),
             ),
           );
         }

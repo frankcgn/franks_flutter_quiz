@@ -1,7 +1,6 @@
-// pages/quiz_page.dart
+// pages/new_quiz_page.dart
 import 'dart:math';
 
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:provider/provider.dart';
@@ -9,16 +8,14 @@ import 'package:provider/provider.dart';
 import '../models/appSettings.dart';
 import '../models/global_state.dart';
 import '../models/vocabulary.dart';
-import '../widgets/action_button.dart';
-import '../widgets/example_text_widget.dart';
+import '../widgets/action_button3.dart';
+import '../widgets/flag_helper_widget.dart';
 import '../widgets/input_field_container.dart';
-import '../widgets/question_container.dart';
 import '../widgets/status_bar.dart';
-import '../widgets/wrong_answer_container.dart';
 
 typedef VocabularyCallback = void Function(Vocabulary voc);
 
-enum QuizState { waitingForAnswer, correctAnswer, wrongAnswer }
+enum NewQuizState { waitingForAnswer, correctAnswer, wrongAnswer }
 
 class QuizPage extends StatefulWidget {
   final List<Vocabulary> vocabularies;
@@ -43,7 +40,7 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
   final TextEditingController answerController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   final FlutterTts flutterTts = FlutterTts();
-  QuizState quizState = QuizState.waitingForAnswer;
+  NewQuizState quizState = NewQuizState.waitingForAnswer;
   bool askGerman = true;
   bool showExample = false;
   bool _inputEnabled = true;
@@ -51,14 +48,14 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
   // Speichert die aktuell geprüfte Vokabel.
   Vocabulary? activeVocabulary;
 
-  // Neuer Filtermode (z.B. basierend auf der Anzahl richtiger Antworten)
+  // Neuer Filtermodus (basierend auf der Anzahl richtiger Antworten)
   final RestorableInt _filterMode = RestorableInt(0);
 
-  // Suchbegriff
+  // Suchbegriff (falls verwendet)
   String _searchQuery = '';
 
   @override
-  String? get restorationId => 'quiz_page';
+  String? get restorationId => 'new_quiz_page';
 
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
@@ -87,7 +84,7 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
     return s.replaceAll(RegExp(r'\([^)]*\)'), '').trim();
   }
 
-  List<Vocabulary> get filteredVocabularies {
+  List<Vocabulary> get filteredVocabs {
     List<Vocabulary> list = widget.vocabularies.where((voc) {
       final int counter = askGerman ? voc.deToEnCounter : voc.enToDeCounter;
       switch (_filterMode.value) {
@@ -105,12 +102,11 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
           return true;
       }
     }).toList();
+    // Zusätzlich nach Gruppen filtern:
     if (Provider.of<GlobalState>(context).selectedGroup != 'Alle') {
       list = list
-          .where(
-            (voc) =>
-                voc.group == Provider.of<GlobalState>(context).selectedGroup,
-          )
+          .where((voc) =>
+              voc.group == Provider.of<GlobalState>(context).selectedGroup)
           .toList();
     }
     if (_searchQuery.isNotEmpty) {
@@ -124,9 +120,9 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
 
   Vocabulary? get currentVocabulary {
     if (activeVocabulary != null) return activeVocabulary;
-    if (filteredVocabularies.isEmpty) return null;
+    if (filteredVocabs.isEmpty) return null;
     final Map<int, List<Vocabulary>> groups = {};
-    for (var voc in filteredVocabularies) {
+    for (var voc in filteredVocabs) {
       final int counter = askGerman ? voc.deToEnCounter : voc.enToDeCounter;
       groups.putIfAbsent(counter, () => []).add(voc);
     }
@@ -138,10 +134,10 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
     return activeVocabulary;
   }
 
-  Map<String, int> _computeStats() {
-    final int total = filteredVocabularies.length;
+  Map<String, int> _computeLevels() {
+    final int total = filteredVocabs.length;
     int count0 = 0, count1_2 = 0, count3_4 = 0, countAbove4 = 0;
-    for (var voc in filteredVocabularies) {
+    for (var voc in filteredVocabs) {
       final int counter = askGerman ? voc.deToEnCounter : voc.enToDeCounter;
       if (counter == 0) {
         count0++;
@@ -162,35 +158,8 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
     };
   }
 
-  bool _isDueHelper(DateTime? lastQuery, int intervalDays, DateTime today) =>
-      lastQuery == null ||
-          !lastQuery.add(Duration(days: intervalDays)).isAfter(today);
-
-  bool isDue(Vocabulary voc, bool askGerman, AppSettings settings) {
-    final DateTime today = DateTime.now();
-    if (askGerman) {
-      if (voc.deToEnCounter < 3) return true;
-      if (voc.deToEnCounter == 3) {
-        return _isDueHelper(voc.deToEnLastQuery, settings.intervalFor3, today);
-      }
-      if (voc.deToEnCounter == 4) {
-        return _isDueHelper(voc.deToEnLastQuery, settings.intervalFor4, today);
-      }
-      return _isDueHelper(voc.deToEnLastQuery, settings.intervalFor5, today);
-    } else {
-      if (voc.enToDeCounter < 3) return true;
-      if (voc.enToDeCounter == 3) {
-        return _isDueHelper(voc.enToDeLastQuery, settings.intervalFor3, today);
-      }
-      if (voc.enToDeCounter == 4) {
-        return _isDueHelper(voc.enToDeLastQuery, settings.intervalFor4, today);
-      }
-      return _isDueHelper(voc.enToDeLastQuery, settings.intervalFor5, today);
-    }
-  }
-
-  Future<void> _speakEnglishText(String text) async {
-    await flutterTts.setLanguage("en-US");
+  Future<void> _speakText(String text, String language) async {
+    await flutterTts.setLanguage(language);
     await flutterTts.speak(text);
   }
 
@@ -223,7 +192,8 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
         }
         voc.enToDeLastQuery = DateTime.now();
       }
-      quizState = correct ? QuizState.correctAnswer : QuizState.wrongAnswer;
+      quizState =
+          correct ? NewQuizState.correctAnswer : NewQuizState.wrongAnswer;
       showExample = true;
       _inputEnabled = false;
     });
@@ -233,7 +203,7 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
   void _nextQuestion() {
     setState(() {
       answerController.clear();
-      quizState = QuizState.waitingForAnswer;
+      quizState = NewQuizState.waitingForAnswer;
       showExample = false;
       activeVocabulary = null;
       _inputEnabled = true;
@@ -245,6 +215,7 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
 
   @override
   Widget build(BuildContext context) {
+    // Ermitteln der Gruppen aus den Vokabeln:
     final List<String> groups = widget.vocabularies
         .map((voc) => voc.group ?? '')
         .where((g) => g.isNotEmpty)
@@ -252,215 +223,267 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
         .toList();
     groups.sort();
 
-    if (filteredVocabularies.isEmpty || currentVocabulary == null) {
-      return const Center(child: Text('Keine fälligen Vokabeln vorhanden.'));
+    if (!groups.contains(Provider.of<GlobalState>(context).selectedGroup)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Provider.of<GlobalState>(context, listen: false)
+            .setSelectedGroup('Alle');
+      });
     }
-    final Vocabulary currentVoc = currentVocabulary!;
-    final String questionText =
-        askGerman ? currentVoc.german : currentVoc.english;
-    final String rawExampleText =
-        askGerman ? currentVoc.germanSentence : currentVoc.englishSentence;
-    final bool noExample = rawExampleText.trim().isEmpty;
-    final String exampleText = noExample
-        ? (askGerman ? 'kein text vorhanden' : 'no text available')
-        : rawExampleText;
-    final TextStyle exampleStyle = noExample
-        ? Theme.of(context)
-        .textTheme
-        .bodyLarge!
-        .copyWith(fontStyle: FontStyle.italic)
-        : Theme.of(context).textTheme.bodyLarge!;
-    final String expectedAnswer =
-        askGerman ? currentVoc.english : currentVoc.german;
-    final bool darkMode = widget.settings.darkMode;
-    final Color inputBorderColor = quizState == QuizState.correctAnswer
-        ? Colors.green
-        : quizState == QuizState.wrongAnswer
-        ? Colors.red
-        : Colors.grey;
-    final Map<String, int> stats = _computeStats();
+
+    // Anwenden der Filterlogik (Gruppenfilter, Filtermodus und Suchbegriff)
+    List<Vocabulary> filteredVocabs = widget.vocabularies.where((voc) {
+      bool matchesSearch =
+          voc.german.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+              voc.english.toLowerCase().contains(_searchQuery.toLowerCase());
+      bool matchesGroup =
+          Provider.of<GlobalState>(context).selectedGroup == 'Alle' ||
+              (voc.group != null &&
+                  voc.group == Provider.of<GlobalState>(context).selectedGroup);
+      return matchesSearch && matchesGroup;
+    }).toList();
+    filteredVocabs.sort((a, b) => a.german.compareTo(b.german));
+
+    final Map<String, int> levels = _computeLevels();
 
     return Scaffold(
-      body: GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Card(
-            elevation: 4,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                return Column(
-                  children: [
-                    // Dropdown für den Gruppenfilter (über der Statusbar)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8.0, vertical: 8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('Gruppe:'),
-                          DropdownButton<String>(
-                            isExpanded: true,
-                            value:
-                                Provider.of<GlobalState>(context).selectedGroup,
-                            onChanged: (String? newValue) {
-                              if (newValue != null) {
-                                Provider.of<GlobalState>(context, listen: false)
-                                    .setSelectedGroup(newValue);
-                              }
-                              setState(() {
-                                activeVocabulary = null;
-                                quizState = QuizState.waitingForAnswer;
-                                _inputEnabled = true;
-                                answerController.clear();
-                              });
-                            },
-                            items: <String>['Alle', ...groups]
-                                .map<DropdownMenuItem<String>>((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value),
-                              );
-                            }).toList(),
-                          ),
-                        ],
-                      ),
-                    ),
-                    // Statusbar, die nun auch den Gruppenfilter berücksichtigt
-                    LevelStatusBar(
-                      levelCounter: stats,
-                      darkMode: darkMode,
-                      selectedFilterIndex: _filterMode.value,
-                      onFilterSelected: (int index) {
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Dropdown-Filter als Row (nebeneinander: Label + Dropdown)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+            child: Row(
+              children: [
+                const Text('Gruppe:'),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: DropdownButton<String>(
+                    isExpanded: true,
+                    value: Provider.of<GlobalState>(context).selectedGroup,
+                    onChanged: (String? newValue) {
+                      if (newValue != null) {
+                        Provider.of<GlobalState>(context, listen: false)
+                            .setSelectedGroup(newValue);
                         setState(() {
-                          _filterMode.value = index;
                           activeVocabulary = null;
-                          quizState = QuizState.waitingForAnswer;
-                          showExample = false;
+                          quizState = NewQuizState.waitingForAnswer;
                           _inputEnabled = true;
                           answerController.clear();
                         });
-                      },
+                      }
+                    },
+                    items: <String>['Alle', ...groups]
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Levelinformationen (z.B. gruppierte Anzeige der richtigen Antworten)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+            child: LevelStatusBar(
+              levelCounter: levels,
+              darkMode: widget.settings.darkMode,
+              selectedFilterIndex: _filterMode.value,
+              onFilterSelected: (int index) {
+                setState(() {
+                  _filterMode.value = index;
+                  activeVocabulary = null;
+                  quizState = NewQuizState.waitingForAnswer;
+                  _inputEnabled = true;
+                  answerController.clear();
+                });
+              },
+            ),
+          ),
+          // Karte mit Vokabelinformationen (aktuelle Frage)
+          Expanded(
+            child: ListView.builder(
+              itemCount: 1,
+              itemBuilder: (context, index) {
+                Vocabulary voc = currentVocabulary!;
+                return Card(
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  elevation: 3,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: ExpansionTile(
+                    // Hier verwenden wir den ExpansionTile nur, wenn showExample true ist.
+                    // Andernfalls werden keine Vokabelergebnisse angezeigt und der Pfeil (trailing) ausgeblendet.
+                    initiallyExpanded: showExample,
+                    trailing: showExample ? null : const SizedBox.shrink(),
+                    title: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Zeile mit deutscher Vokabel (mit Flagge, Text und LongPress)
+                        if (askGerman)
+                          FlagHelper.buildFlagTextRowWithSpeakerLongPress(
+                            voc.german,
+                            'assets/flags/de.jpg',
+                            'de-DE',
+                            onLongPress: _speakText,
+                          ),
+                        if (!askGerman)
+                          FlagHelper.buildFlagTextRowWithSpeakerLongPress(
+                            voc.english,
+                            'assets/flags/en.jpg',
+                            'en-US',
+                            onLongPress: _speakText,
+                          ),
+                        if (askGerman)
+                          // Zeile mit englischer Vokabel (mit Flagge, Text und LongPress)
+                          FlagHelper.buildFlagTextRowWithSpeakerLongPress(
+                            voc.germanSentence,
+                            '',
+                            'de-DE',
+                            onLongPress: _speakText,
+                          ),
+                        if (!askGerman)
+                          // Zeile mit englischer Vokabel (mit Flagge, Text und LongPress)
+                          FlagHelper.buildFlagTextRowWithSpeakerLongPress(
+                            voc.englishSentence,
+                            '',
+                            'en-US',
+                            onLongPress: _speakText,
+                          ),
+                      ],
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Abgefragt: ${currentVoc.answerCount}    Richtig: ${askGerman ? currentVoc.deToEnCounter : currentVoc.enToDeCounter}',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                      textAlign: TextAlign.center,
-                    ),
-                    // Scrollbarer Bereich, der Frage, Beispieltext, Eingabefeld und Antwort umfasst
-                    Expanded(
-                      child: SingleChildScrollView(
+                    children: [
+                      // Divider: 75 % der Breite, links ausgerichtet
+                      FractionallySizedBox(
+                        widthFactor: 0.75,
+                        alignment: Alignment.centerLeft,
+                        child: const Divider(thickness: 1, color: Colors.grey),
+                      ),
+                      Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: QuestionContainer(
-                                      questionText: questionText),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            ExampleTextWidget(
-                              exampleText: exampleText,
-                              textStyle: exampleStyle,
-                              isEmptyExample: noExample,
-                              askGerman: askGerman,
-                            ),
-                            const SizedBox(height: 20),
-                            // Eingabefeld mit Antwort, daneben das Speak-Icon für _speakEnglish
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: InputFieldContainer(
-                                    controller: answerController,
-                                    focusNode: _focusNode,
-                                    enabled: _inputEnabled,
-                                    borderColor: inputBorderColor,
-                                    onSubmitted: (value) {
-                                      if (!_inputEnabled) {
-                                        _nextQuestion();
-                                      } else {
-                                        _handleAnswer();
-                                      }
-                                    },
-                                    textStyle: Theme.of(context)
-                                        .textTheme
-                                        .headlineSmall
-                                        ?.copyWith(
-                                          color: showExample
-                                              ? (quizState ==
-                                                      QuizState.correctAnswer
-                                                  ? Colors.green
-                                                  : Colors.red)
-                                              : Colors.black,
-                                        ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            if (showExample &&
-                                quizState == QuizState.wrongAnswer)
-                              WrongAnswerContainer(
-                                expectedAnswer: expectedAnswer,
-                                onPressed: () {},
+                            if (askGerman)
+                              // Englischer Beispielsatz (mit Flagge und LongPress)
+                              FlagHelper.buildFlagTextRowWithSpeakerLongPress(
+                                voc.english,
+                                'assets/flags/en.jpg',
+                                'en-US',
+                                onLongPress: _speakText,
                               ),
-                            if (showExample)
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Expanded(
-                                      child: AutoSizeText(
-                                        'Beispielsatz (${askGerman ? "Englisch" : "Deutsch"}):\n${(askGerman ? currentVoc.englishSentence : currentVoc.germanSentence).trim().isEmpty ? (askGerman ? "no text available" : "kein text vorhanden") : (askGerman ? currentVoc.englishSentence : currentVoc.germanSentence)}',
-                                        style: ((askGerman
-                                                    ? currentVoc.englishSentence
-                                                    : currentVoc.germanSentence)
-                                                .trim()
-                                                .isEmpty)
-                                            ? Theme.of(context)
-                                                .textTheme
-                                                .bodyLarge!
-                                                .copyWith(
-                                                    fontStyle: FontStyle.italic)
-                                            : Theme.of(context)
-                                                .textTheme
-                                                .bodyLarge,
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.volume_up,
-                                          size: 16.0),
-                                      onPressed: () => _speakEnglishText(
-                                          askGerman
-                                              ? currentVoc.englishSentence
-                                              : currentVoc.germanSentence),
-                                      tooltip: 'Sprich den Beispielsatz aus',
-                                    ),
-                                  ],
-                                ),
+                            if (!askGerman)
+                              FlagHelper.buildFlagTextRowWithSpeakerLongPress(
+                                voc.german,
+                                'assets/flags/de.jpg',
+                                'de-DE',
+                                onLongPress: _speakText,
+                              ),
+                            const SizedBox(height: 1),
+                            if (askGerman)
+                              // Deutscher Beispielsatz (mit Flagge und LongPress)
+                              FlagHelper.buildFlagTextRowWithSpeakerLongPress(
+                                voc.englishSentence,
+                                '',
+                                'en-US',
+                                onLongPress: _speakText,
+                              ),
+                            if (!askGerman)
+                              FlagHelper.buildFlagTextRowWithSpeakerLongPress(
+                                voc.germanSentence,
+                                '',
+                                'de-DE',
+                                onLongPress: _speakText,
                               ),
                           ],
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 );
               },
             ),
           ),
-        ),
+          // Das Eingabefeld direkt unterhalb der Karte
+          if (!(showExample && quizState == NewQuizState.wrongAnswer))
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+              child: InputFieldContainer(
+                controller: answerController,
+                focusNode: _focusNode,
+                enabled: _inputEnabled,
+                borderColor: quizState == NewQuizState.correctAnswer
+                    ? Colors.green
+                    : quizState == NewQuizState.wrongAnswer
+                        ? Colors.red
+                        : Colors.grey,
+                onSubmitted: (value) {
+                  if (!_inputEnabled) {
+                    _nextQuestion();
+                  } else {
+                    _handleAnswer();
+                  }
+                },
+                textStyle: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: showExample
+                          ? (quizState == NewQuizState.correctAnswer
+                              ? Colors.green
+                              : Colors.red)
+                          : Colors.black,
+                    ),
+              ),
+            ),
+          // Anzeige der Antworten, falls die Antwort falsch ist:
+          if (showExample && quizState == NewQuizState.wrongAnswer)
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Card(
+                    color: Colors.red[50],
+                    shape: RoundedRectangleBorder(
+                      side: const BorderSide(color: Colors.red, width: 2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Text(
+                        'Deine Antwort:    ${answerController.text}',
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Card(
+                    color: Colors.green[50],
+                    shape: RoundedRectangleBorder(
+                      side: const BorderSide(color: Colors.green, width: 2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Text(
+                        'Richtige Antwort: ${askGerman ? currentVocabulary?.english : currentVocabulary?.german}',
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: ActionButton(
+        child: ActionButton3(
           text: showExample ? 'Nächste Vokabel' : 'Antwort überprüfen',
           onPressed: showExample ? _nextQuestion : _handleAnswer,
         ),

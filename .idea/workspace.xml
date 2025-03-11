@@ -5,11 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ae404f1f-f59e-4b7d-9848-53b6e9597e58" name="Changes" comment="deu - eng switch in new design">
+      <change afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/quiz_page_old_style.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/ios/Podfile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/ios/Podfile.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/new_quiz_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/new_quiz_page.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/home_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/home_page.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/new_quiz_page.dart" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/quiz_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/quiz_page.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/widgets/status_bar.dart" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/widgets/status_bar.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/pubspec.lock" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -107,7 +108,7 @@
       <workItem from="1740218753594" duration="5369000" />
       <workItem from="1740236004224" duration="659000" />
       <workItem from="1740236692458" duration="71612000" />
-      <workItem from="1741423142874" duration="84860000" />
+      <workItem from="1741423142874" duration="90887000" />
     </task>
     <task id="LOCAL-00001" summary="Model angepasst">
       <option name="closed" value="true" />
@@ -309,7 +310,15 @@
       <option name="project" value="LOCAL" />
       <updated>1741558096394</updated>
     </task>
-    <option name="localTasksCounter" value="26" />
+    <task id="LOCAL-00026" summary="deu - eng switch in new design">
+      <option name="closed" value="true" />
+      <created>1741560547955</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1741560547955</updated>
+    </task>
+    <option name="localTasksCounter" value="27" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
