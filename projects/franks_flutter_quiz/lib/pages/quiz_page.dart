@@ -11,7 +11,6 @@ import '../models/vocabulary.dart';
 import '../widgets/action_button3.dart';
 import '../widgets/flag_helper_widget.dart';
 import '../widgets/input_field_container.dart';
-import '../widgets/status_bar.dart';
 
 typedef VocabularyCallback = void Function(Vocabulary voc);
 
@@ -48,8 +47,9 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
   // Speichert die aktuell geprüfte Vokabel.
   Vocabulary? activeVocabulary;
 
-  // Neuer Filtermodus (basierend auf der Anzahl richtiger Antworten)
-  final RestorableInt _filterMode = RestorableInt(0);
+  // Neuer Filtermodus (basierend auf der Anzahl richtiger Antworten).
+  // Default: -1 bedeutet "Alle" (keine Level-Einschränkung).
+  final RestorableInt _filterMode = RestorableInt(-1);
 
   // Suchbegriff (falls verwendet)
   String _searchQuery = '';
@@ -84,40 +84,45 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
     return s.replaceAll(RegExp(r'\([^)]*\)'), '').trim();
   }
 
+  /// Liefert alle Vokabeln, die anhand der Gruppe, des Suchbegriffs
+  /// und – falls ein Level (Filter ungleich -1) ausgewählt wurde – des Levels gefiltert sind.
   List<Vocabulary> get filteredVocabs {
-    List<Vocabulary> list = widget.vocabularies.where((voc) {
-      final int counter = askGerman ? voc.deToEnCounter : voc.enToDeCounter;
-      switch (_filterMode.value) {
-        case 0:
-          return true;
-        case 1:
-          return counter == 0;
-        case 2:
-          return counter == 1 || counter == 2;
-        case 3:
-          return counter == 3 || counter == 4;
-        case 4:
-          return counter > 4;
-        default:
-          return true;
-      }
-    }).toList();
-    // Zusätzlich nach Gruppen filtern:
+    // Zuerst nach Gruppe filtern:
+    List<Vocabulary> list = widget.vocabularies;
     if (Provider.of<GlobalState>(context).selectedGroup != 'Alle') {
       list = list
           .where((voc) =>
               voc.group == Provider.of<GlobalState>(context).selectedGroup)
           .toList();
     }
+    // Anschließend den Suchbegriff berücksichtigen:
     if (_searchQuery.isNotEmpty) {
       list = list.where((voc) {
         return voc.german.toLowerCase().contains(_searchQuery.toLowerCase()) ||
             voc.english.toLowerCase().contains(_searchQuery.toLowerCase());
       }).toList();
     }
+    // Levelfilter anwenden – außer wenn "-1" (Alle) gewählt wurde:
+    if (_filterMode.value != -1) {
+      list = list.where((voc) {
+        final int counter = askGerman ? voc.deToEnCounter : voc.enToDeCounter;
+        if (_filterMode.value == 0) {
+          return counter == 0;
+        } else if (_filterMode.value == 1) {
+          return counter == 1 || counter == 2;
+        } else if (_filterMode.value == 2) {
+          return counter == 3 || counter == 4;
+        } else if (_filterMode.value == 3) {
+          return counter > 4;
+        }
+        return true;
+      }).toList();
+    }
     return list;
   }
 
+  /// Liefert die aktuell geprüfte Vokabel aus der gefilterten Liste.
+  /// Hier werden alle Filter (Gruppe, Suchbegriff und Level) berücksichtigt.
   Vocabulary? get currentVocabulary {
     if (activeVocabulary != null) return activeVocabulary;
     if (filteredVocabs.isEmpty) return null;
@@ -134,10 +139,22 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
     return activeVocabulary;
   }
 
+  /// Berechnet die Anzahl der Vokabeln je Level basierend auf der Gesamtmenge
+  /// der Vokabeln in der ausgewählten Gruppe (und dem Suchbegriff), ohne den Level-Filter.
   Map<String, int> _computeLevels() {
-    final int total = filteredVocabs.length;
+    final List<Vocabulary> groupVocabs = widget.vocabularies.where((voc) {
+      bool matchesSearch =
+          voc.german.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+              voc.english.toLowerCase().contains(_searchQuery.toLowerCase());
+      bool matchesGroup =
+          Provider.of<GlobalState>(context).selectedGroup == 'Alle' ||
+              (voc.group != null &&
+                  voc.group == Provider.of<GlobalState>(context).selectedGroup);
+      return matchesSearch && matchesGroup;
+    }).toList();
+    final int total = groupVocabs.length;
     int count0 = 0, count1_2 = 0, count3_4 = 0, countAbove4 = 0;
-    for (var voc in filteredVocabs) {
+    for (var voc in groupVocabs) {
       final int counter = askGerman ? voc.deToEnCounter : voc.enToDeCounter;
       if (counter == 0) {
         count0++;
@@ -213,46 +230,341 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    // Ermitteln der Gruppen aus den Vokabeln:
-    final List<String> groups = widget.vocabularies
-        .map((voc) => voc.group ?? '')
-        .where((g) => g.isNotEmpty)
-        .toSet()
-        .toList();
-    groups.sort();
-
-    if (!groups.contains(Provider.of<GlobalState>(context).selectedGroup)) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Provider.of<GlobalState>(context, listen: false)
-            .setSelectedGroup('Alle');
-      });
+  /// Baut die Vokabel-Card.
+  /// Falls keine Vokabel gefunden wurde (entsprechend der Filter),
+  /// wird eine Card mit dem Hinweis "Keine Vokabel für diese Gruppe mit diesem Level gefunden" angezeigt.
+  Widget buildVocabularyCard() {
+    if (currentVocabulary == null) {
+      return Card(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        elevation: 3,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Center(
+            child: Text(
+              "Keine Vokabel für diese Gruppe mit diesem Level gefunden",
+              style: const TextStyle(fontSize: 16, color: Colors.black),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      );
     }
 
-    // Anwenden der Filterlogik (Gruppenfilter, Filtermodus und Suchbegriff)
-    List<Vocabulary> filteredVocabs = widget.vocabularies.where((voc) {
-      bool matchesSearch =
-          voc.german.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-              voc.english.toLowerCase().contains(_searchQuery.toLowerCase());
-      bool matchesGroup =
-          Provider.of<GlobalState>(context).selectedGroup == 'Alle' ||
-              (voc.group != null &&
-                  voc.group == Provider.of<GlobalState>(context).selectedGroup);
-      return matchesSearch && matchesGroup;
-    }).toList();
-    filteredVocabs.sort((a, b) => a.german.compareTo(b.german));
-
-    final Map<String, int> levels = _computeLevels();
-
-    return Scaffold(
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+    Vocabulary voc = currentVocabulary!;
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      elevation: 3,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: ExpansionTile(
+        initiallyExpanded: showExample,
+        trailing: showExample ? null : const SizedBox.shrink(),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              alignment: Alignment.centerLeft,
+              child: askGerman
+                  ? FlagHelper.buildFlagTextRowWithSpeakerLongPress(
+                      voc.german,
+                      'assets/flags/de.jpg',
+                      'de-DE',
+                      onLongPress: _speakText,
+                    )
+                  : FlagHelper.buildFlagTextRowWithSpeakerLongPress(
+                      voc.english,
+                      'assets/flags/en.jpg',
+                      'en-US',
+                      onLongPress: _speakText,
+                    ),
+            ),
+            Container(
+              alignment: Alignment.centerLeft,
+              child: askGerman
+                  ? FlagHelper.buildFlagTextRowWithSpeakerLongPress(
+                      voc.germanSentence,
+                      '',
+                      'de-DE',
+                      onLongPress: _speakText,
+                    )
+                  : FlagHelper.buildFlagTextRowWithSpeakerLongPress(
+                      voc.englishSentence,
+                      '',
+                      'en-US',
+                      onLongPress: _speakText,
+                    ),
+            ),
+          ],
+        ),
         children: [
-          // Dropdown-Filter als Row (nebeneinander: Label + Dropdown)
+          FractionallySizedBox(
+            widthFactor: 0.75,
+            alignment: Alignment.centerLeft,
+            child: const Divider(thickness: 1, color: Colors.grey),
+          ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
-            child: Row(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  alignment: Alignment.centerLeft,
+                  child: askGerman
+                      ? FlagHelper.buildFlagTextRowWithSpeakerLongPress(
+                          voc.english,
+                          'assets/flags/en.jpg',
+                          'en-US',
+                          onLongPress: _speakText,
+                        )
+                      : FlagHelper.buildFlagTextRowWithSpeakerLongPress(
+                          voc.german,
+                          'assets/flags/de.jpg',
+                          'de-DE',
+                          onLongPress: _speakText,
+                        ),
+                ),
+                const SizedBox(height: 1),
+                Container(
+                  alignment: Alignment.centerLeft,
+                  child: askGerman
+                      ? FlagHelper.buildFlagTextRowWithSpeakerLongPress(
+                          voc.englishSentence,
+                          '',
+                          'en-US',
+                          onLongPress: _speakText,
+                        )
+                      : FlagHelper.buildFlagTextRowWithSpeakerLongPress(
+                          voc.germanSentence,
+                          '',
+                          'de-DE',
+                          onLongPress: _speakText,
+                        ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildResultCard() {
+    if (quizState == NewQuizState.correctAnswer) {
+      return Card(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        elevation: 3,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 130,
+                child: const Text(
+                  'Deine Antwort:',
+                  style: TextStyle(fontSize: 16, color: Colors.black),
+                ),
+              ),
+              Expanded(
+                child: Container(
+                  color: Colors.green[100],
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 2.0, vertical: 1.0),
+                  child: Text(
+                    answerController.text,
+                    style: const TextStyle(fontSize: 16, color: Colors.black),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    } else {
+      return Card(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        elevation: 3,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min, // Nur so hoch wie nötig
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 130,
+                    child: const Text(
+                      'Deine Antwort:',
+                      style: TextStyle(fontSize: 16, color: Colors.black),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      color: Colors.red[100],
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 2.0, vertical: 1.0),
+                      child: Text(
+                        answerController.text,
+                        style:
+                            const TextStyle(fontSize: 16, color: Colors.black),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 130,
+                    child: const Text(
+                      'Richtige Antwort:',
+                      style: TextStyle(fontSize: 16, color: Colors.black),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      color: Colors.green[100],
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 2.0, vertical: 1.0),
+                      child: Text(
+                        askGerman
+                            ? currentVocabulary?.english ?? ''
+                            : currentVocabulary?.german ?? '',
+                        style:
+                            const TextStyle(fontSize: 16, color: Colors.black),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+  }
+
+  Widget buildAnswerInput(BuildContext context) {
+    final Orientation orientation = MediaQuery.of(context).orientation;
+    final TextStyle answerTextStyle = TextStyle(
+      fontSize: 16,
+      color: showExample
+          ? (quizState == NewQuizState.correctAnswer
+              ? Colors.green
+              : Colors.red)
+          : Colors.black,
+    );
+    const contentPadding = EdgeInsets.symmetric(horizontal: 4.0, vertical: 0.0);
+    if (orientation == Orientation.landscape) {
+      if (showExample) {
+        // In Landscape: Bei angezeigter Antwort nur den Button anzeigen
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              SizedBox(
+                width: 50,
+                height: 50,
+                child: ActionButton3(
+                  text: '>',
+                  onPressed: _nextQuestion,
+                ),
+              ),
+            ],
+          ),
+        );
+      } else {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: InputFieldContainer(
+                  controller: answerController,
+                  focusNode: _focusNode,
+                  enabled: _inputEnabled,
+                  borderColor: quizState == NewQuizState.correctAnswer
+                      ? Colors.green
+                      : quizState == NewQuizState.wrongAnswer
+                          ? Colors.red
+                          : Colors.grey,
+                  onSubmitted: (value) {
+                    if (!_inputEnabled) {
+                      _nextQuestion();
+                    } else {
+                      _handleAnswer();
+                    }
+                  },
+                  textStyle: answerTextStyle,
+                  contentPadding: contentPadding,
+                ),
+              ),
+              const SizedBox(width: 8),
+              SizedBox(
+                width: 50,
+                height: 50,
+                child: ActionButton3(
+                  text: '>',
+                  onPressed: showExample ? _nextQuestion : _handleAnswer,
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+    } else {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+        child: InputFieldContainer(
+          controller: answerController,
+          focusNode: _focusNode,
+          enabled: _inputEnabled,
+          borderColor: quizState == NewQuizState.correctAnswer
+              ? Colors.green
+              : quizState == NewQuizState.wrongAnswer
+                  ? Colors.red
+                  : Colors.grey,
+          onSubmitted: (value) {
+            if (!_inputEnabled) {
+              _nextQuestion();
+            } else {
+              _handleAnswer();
+            }
+          },
+          textStyle: answerTextStyle,
+          contentPadding: contentPadding,
+        ),
+      );
+    }
+  }
+
+  Widget buildFilterSection(BuildContext context, List<String> groups,
+      Map<String, int> levels, Map<int, String> levelOptions) {
+    final Orientation orientation = MediaQuery.of(context).orientation;
+
+    if (orientation == Orientation.portrait) {
+      // Vertikale Anordnung: Dropdowns untereinander
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+        child: Column(
+          children: [
+            Row(
               children: [
                 const Text('Gruppe:'),
                 const SizedBox(width: 8),
@@ -283,211 +595,223 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
                 ),
               ],
             ),
-          ),
-          // Levelinformationen (z.B. gruppierte Anzeige der richtigen Antworten)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-            child: LevelStatusBar(
-              levelCounter: levels,
-              darkMode: widget.settings.darkMode,
-              selectedFilterIndex: _filterMode.value,
-              onFilterSelected: (int index) {
-                setState(() {
-                  _filterMode.value = index;
-                  activeVocabulary = null;
-                  quizState = NewQuizState.waitingForAnswer;
-                  _inputEnabled = true;
-                  answerController.clear();
-                });
-              },
-            ),
-          ),
-          // Karte mit Vokabelinformationen (aktuelle Frage)
-          Expanded(
-            child: ListView.builder(
-              itemCount: 1,
-              itemBuilder: (context, index) {
-                Vocabulary voc = currentVocabulary!;
-                return Card(
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  elevation: 3,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                const Text('Level:'),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: DropdownButton<int>(
+                    isExpanded: true,
+                    value: _filterMode.value,
+                    onChanged: (int? newValue) {
+                      if (newValue != null) {
+                        setState(() {
+                          _filterMode.value = newValue;
+                          activeVocabulary = null;
+                          quizState = NewQuizState.waitingForAnswer;
+                          _inputEnabled = true;
+                          answerController.clear();
+                        });
+                      }
+                    },
+                    items: levelOptions.entries.map((entry) {
+                      // Bei -1: "Alle" -> alle Vokabeln der Gruppe
+                      // Bei 0: nur Level 0, etc.
+                      final String label = entry.value;
+                      final int count = entry.key == -1
+                          ? levels['total'] ?? 0
+                          : levels[getLevelKey(entry.key)] ?? 0;
+                      return DropdownMenuItem<int>(
+                        value: entry.key,
+                        child: Text('$label ($count)'),
+                      );
+                    }).toList(),
                   ),
-                  child: ExpansionTile(
-                    // Hier verwenden wir den ExpansionTile nur, wenn showExample true ist.
-                    // Andernfalls werden keine Vokabelergebnisse angezeigt und der Pfeil (trailing) ausgeblendet.
-                    initiallyExpanded: showExample,
-                    trailing: showExample ? null : const SizedBox.shrink(),
-                    title: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Zeile mit deutscher Vokabel (mit Flagge, Text und LongPress)
-                        if (askGerman)
-                          FlagHelper.buildFlagTextRowWithSpeakerLongPress(
-                            voc.german,
-                            'assets/flags/de.jpg',
-                            'de-DE',
-                            onLongPress: _speakText,
-                          ),
-                        if (!askGerman)
-                          FlagHelper.buildFlagTextRowWithSpeakerLongPress(
-                            voc.english,
-                            'assets/flags/en.jpg',
-                            'en-US',
-                            onLongPress: _speakText,
-                          ),
-                        if (askGerman)
-                          // Zeile mit englischer Vokabel (mit Flagge, Text und LongPress)
-                          FlagHelper.buildFlagTextRowWithSpeakerLongPress(
-                            voc.germanSentence,
-                            '',
-                            'de-DE',
-                            onLongPress: _speakText,
-                          ),
-                        if (!askGerman)
-                          // Zeile mit englischer Vokabel (mit Flagge, Text und LongPress)
-                          FlagHelper.buildFlagTextRowWithSpeakerLongPress(
-                            voc.englishSentence,
-                            '',
-                            'en-US',
-                            onLongPress: _speakText,
-                          ),
-                      ],
-                    ),
-                    children: [
-                      // Divider: 75 % der Breite, links ausgerichtet
-                      FractionallySizedBox(
-                        widthFactor: 0.75,
-                        alignment: Alignment.centerLeft,
-                        child: const Divider(thickness: 1, color: Colors.grey),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (askGerman)
-                              // Englischer Beispielsatz (mit Flagge und LongPress)
-                              FlagHelper.buildFlagTextRowWithSpeakerLongPress(
-                                voc.english,
-                                'assets/flags/en.jpg',
-                                'en-US',
-                                onLongPress: _speakText,
-                              ),
-                            if (!askGerman)
-                              FlagHelper.buildFlagTextRowWithSpeakerLongPress(
-                                voc.german,
-                                'assets/flags/de.jpg',
-                                'de-DE',
-                                onLongPress: _speakText,
-                              ),
-                            const SizedBox(height: 1),
-                            if (askGerman)
-                              // Deutscher Beispielsatz (mit Flagge und LongPress)
-                              FlagHelper.buildFlagTextRowWithSpeakerLongPress(
-                                voc.englishSentence,
-                                '',
-                                'en-US',
-                                onLongPress: _speakText,
-                              ),
-                            if (!askGerman)
-                              FlagHelper.buildFlagTextRowWithSpeakerLongPress(
-                                voc.germanSentence,
-                                '',
-                                'de-DE',
-                                onLongPress: _speakText,
-                              ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
+                ),
+              ],
             ),
-          ),
-          // Das Eingabefeld direkt unterhalb der Karte
-          if (!(showExample && quizState == NewQuizState.wrongAnswer))
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-              child: InputFieldContainer(
-                controller: answerController,
-                focusNode: _focusNode,
-                enabled: _inputEnabled,
-                borderColor: quizState == NewQuizState.correctAnswer
-                    ? Colors.green
-                    : quizState == NewQuizState.wrongAnswer
-                        ? Colors.red
-                        : Colors.grey,
-                onSubmitted: (value) {
-                  if (!_inputEnabled) {
-                    _nextQuestion();
-                  } else {
-                    _handleAnswer();
-                  }
-                },
-                textStyle: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: showExample
-                          ? (quizState == NewQuizState.correctAnswer
-                              ? Colors.green
-                              : Colors.red)
-                          : Colors.black,
-                    ),
-              ),
-            ),
-          // Anzeige der Antworten, falls die Antwort falsch ist:
-          if (showExample && quizState == NewQuizState.wrongAnswer)
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+          ],
+        ),
+      );
+    } else {
+      // Horizontale Anordnung in Landscape: Wie bisher in einer Row
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+        child: Row(
+          children: [
+            Expanded(
+              child: Row(
                 children: [
-                  Card(
-                    color: Colors.red[50],
-                    shape: RoundedRectangleBorder(
-                      side: const BorderSide(color: Colors.red, width: 2),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Text(
-                        'Deine Antwort:    ${answerController.text}',
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Card(
-                    color: Colors.green[50],
-                    shape: RoundedRectangleBorder(
-                      side: const BorderSide(color: Colors.green, width: 2),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Text(
-                        'Richtige Antwort: ${askGerman ? currentVocabulary?.english : currentVocabulary?.german}',
-                        style: const TextStyle(fontSize: 16),
-                      ),
+                  const Text('Gruppe:'),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: DropdownButton<String>(
+                      isExpanded: true,
+                      value: Provider.of<GlobalState>(context).selectedGroup,
+                      onChanged: (String? newValue) {
+                        if (newValue != null) {
+                          Provider.of<GlobalState>(context, listen: false)
+                              .setSelectedGroup(newValue);
+                          setState(() {
+                            activeVocabulary = null;
+                            quizState = NewQuizState.waitingForAnswer;
+                            _inputEnabled = true;
+                            answerController.clear();
+                          });
+                        }
+                      },
+                      items: <String>['Alle', ...groups]
+                          .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
                     ),
                   ),
                 ],
               ),
             ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Row(
+                children: [
+                  const Text('Level:'),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: DropdownButton<int>(
+                      isExpanded: true,
+                      value: _filterMode.value,
+                      onChanged: (int? newValue) {
+                        if (newValue != null) {
+                          setState(() {
+                            _filterMode.value = newValue;
+                            activeVocabulary = null;
+                            quizState = NewQuizState.waitingForAnswer;
+                            _inputEnabled = true;
+                            answerController.clear();
+                          });
+                        }
+                      },
+                      items: levelOptions.entries.map((entry) {
+                        final String label = entry.value;
+                        final int count = entry.key == -1
+                            ? levels['total'] ?? 0
+                            : levels[getLevelKey(entry.key)] ?? 0;
+                        return DropdownMenuItem<int>(
+                          value: entry.key,
+                          child: Text('$label ($count)'),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  /// Gibt den passenden Schlüssel für _computeLevels() zurück.
+  /// -1 entspricht dabei "Alle" (keine Filterung, wird im Dropdown separat behandelt).
+  String getLevelKey(int key) {
+    switch (key) {
+      case 0:
+        return '0';
+      case 1:
+        return '1-2';
+      case 2:
+        return '3-4';
+      case 3:
+        return '>4';
+      default:
+        return 'total';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final Orientation orientation = MediaQuery.of(context).orientation;
+    final List<String> groups = widget.vocabularies
+        .map((voc) => voc.group ?? '')
+        .where((g) => g.isNotEmpty)
+        .toSet()
+        .toList();
+    groups.sort();
+
+    if (!groups.contains(Provider.of<GlobalState>(context).selectedGroup)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Provider.of<GlobalState>(context, listen: false)
+            .setSelectedGroup('Alle');
+      });
+    }
+
+    // _computeLevels() berücksichtigt ausschließlich Gruppe und Suchbegriff.
+    final Map<String, int> levels = _computeLevels();
+    // Level-Optionen: -1 = "Alle", 0 = "0", 1 = "1-2", 2 = "3-4", 3 = ">4"
+    final Map<int, String> levelOptions = {
+      -1: 'Alle',
+      0: '0',
+      1: '1-2',
+      2: '3-4',
+      3: '>4',
+    };
+
+    Widget mainContent;
+    if (orientation == Orientation.landscape) {
+      mainContent = Expanded(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: buildVocabularyCard()),
+            if (showExample)
+              Flexible(
+                fit: FlexFit.loose,
+                child: buildResultCard(),
+              ),
+          ],
+        ),
+      );
+    } else {
+      mainContent = Expanded(
+        child: ListView(
+          children: [
+            buildVocabularyCard(),
+            if (showExample)
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: buildResultCard(),
+              ),
+          ],
+        ),
+      );
+    }
+
+    return Scaffold(
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Filter Section: Je nach Orientierung werden die Dropdowns anders angeordnet.
+          buildFilterSection(context, groups, levels, levelOptions),
+          // Hauptinhalt
+          mainContent,
+          // Eingabebereich: Bei Landscape wird das Inputfeld ausgeblendet, wenn eine Antwort angezeigt wird.
+          if (!(orientation == Orientation.landscape && showExample))
+            buildAnswerInput(context),
         ],
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
+      bottomNavigationBar: orientation == Orientation.portrait
+          ? Padding(
+              padding: const EdgeInsets.all(16.0),
         child: ActionButton3(
           text: showExample ? 'Nächste Vokabel' : 'Antwort überprüfen',
           onPressed: showExample ? _nextQuestion : _handleAnswer,
         ),
-      ),
+            )
+          : null,
     );
   }
 }

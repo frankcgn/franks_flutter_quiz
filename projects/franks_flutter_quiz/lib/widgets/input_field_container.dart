@@ -8,6 +8,7 @@ class InputFieldContainer extends StatelessWidget {
   final Color borderColor;
   final Function(String) onSubmitted;
   final TextStyle? textStyle;
+  final EdgeInsets? contentPadding;
 
   const InputFieldContainer({
     super.key,
@@ -17,6 +18,7 @@ class InputFieldContainer extends StatelessWidget {
     required this.borderColor,
     required this.onSubmitted,
     this.textStyle,
+    this.contentPadding,
   });
 
   @override
@@ -35,9 +37,9 @@ class InputFieldContainer extends StatelessWidget {
         controller: controller,
         textAlign: TextAlign.center,
         style: textStyle ?? Theme.of(context).textTheme.headlineSmall,
-        decoration: const InputDecoration(
+        decoration: InputDecoration(
           hintText: 'Deine Antwort',
-          contentPadding: EdgeInsets.all(12),
+          contentPadding: contentPadding,
           border: InputBorder.none,
         ),
         textInputAction: TextInputAction.done,
