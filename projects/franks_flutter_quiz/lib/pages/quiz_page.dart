@@ -301,7 +301,7 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
             ),
           ],
         ),
-        // Der Divider wurde hier entfernt, um die dünnen schwarzen Linien nicht anzuzeigen.
+        // Es werden keine Divider (dünne Linien) über/unter der Card gerendert.
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -468,7 +468,7 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
     const contentPadding = EdgeInsets.symmetric(horizontal: 4.0, vertical: 0.0);
     if (orientation == Orientation.landscape) {
       if (showExample) {
-        // In Landscape: Bei angezeigter Antwort nur den Button anzeigen
+        // In Landscape: Wenn die Antwort angezeigt wird, nur den Button für die nächste Vokabel anzeigen.
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
           child: Row(
@@ -794,16 +794,16 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
           buildFilterSection(context, groups, levels, levelOptions),
           // Hauptinhalt
           mainContent,
-          // Eingabebereich: Bei Landscape wird das Inputfeld ausgeblendet, wenn eine Antwort angezeigt wird.
-          if (!(orientation == Orientation.landscape && showExample))
-            buildAnswerInput(context),
+          // Eingabebereich: In Landscape wird der Eingabebereich (bzw. der Button) nun immer angezeigt,
+          // sodass in horizontaler Darstellung der Button für die nächste Vokabel auch bei Anzeige der Antwort sichtbar ist.
+          buildAnswerInput(context),
         ],
       ),
       bottomNavigationBar: orientation == Orientation.portrait
           ? Padding(
               padding: const EdgeInsets.all(16.0),
               child: ActionButton3(
-          text: showExample ? 'Nächste Vokabel' : 'Antwort überprüfen',
+                text: showExample ? 'Nächste Vokabel' : 'Antwort überprüfen',
           onPressed: showExample ? _nextQuestion : _handleAnswer,
         ),
             )
