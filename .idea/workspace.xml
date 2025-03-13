@@ -4,11 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ae404f1f-f59e-4b7d-9848-53b6e9597e58" name="Changes" comment="bottom items verkleinert">
+    <list default="true" id="ae404f1f-f59e-4b7d-9848-53b6e9597e58" name="Changes" comment="fix status counter und Vokbelabfrage (Null Pointer)">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/ios/Podfile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/ios/Podfile.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/quiz_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/quiz_page.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/widgets/input_field_container.dart" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/widgets/input_field_container.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/pubspec.lock" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -107,7 +106,7 @@
       <workItem from="1740218753594" duration="5369000" />
       <workItem from="1740236004224" duration="659000" />
       <workItem from="1740236692458" duration="71612000" />
-      <workItem from="1741423142874" duration="102582000" />
+      <workItem from="1741423142874" duration="103646000" />
     </task>
     <task id="LOCAL-00001" summary="Model angepasst">
       <option name="closed" value="true" />
@@ -325,7 +324,15 @@
       <option name="project" value="LOCAL" />
       <updated>1741727930620</updated>
     </task>
-    <option name="localTasksCounter" value="28" />
+    <task id="LOCAL-00028" summary="fix status counter und Vokbelabfrage (Null Pointer)">
+      <option name="closed" value="true" />
+      <created>1741897757677</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1741897757677</updated>
+    </task>
+    <option name="localTasksCounter" value="29" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -366,7 +373,8 @@
     <MESSAGE value="new design new_quiz_page" />
     <MESSAGE value="deu - eng switch in new design" />
     <MESSAGE value="bottom items verkleinert" />
-    <option name="LAST_COMMIT_MESSAGE" value="bottom items verkleinert" />
+    <MESSAGE value="fix status counter und Vokbelabfrage (Null Pointer)" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix status counter und Vokbelabfrage (Null Pointer)" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>

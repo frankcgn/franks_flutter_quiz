@@ -301,12 +301,8 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
             ),
           ],
         ),
+        // Der Divider wurde hier entfernt, um die dünnen schwarzen Linien nicht anzuzeigen.
         children: [
-          FractionallySizedBox(
-            widthFactor: 0.75,
-            alignment: Alignment.centerLeft,
-            child: const Divider(thickness: 1, color: Colors.grey),
-          ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
@@ -806,7 +802,7 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
       bottomNavigationBar: orientation == Orientation.portrait
           ? Padding(
               padding: const EdgeInsets.all(16.0),
-        child: ActionButton3(
+              child: ActionButton3(
           text: showExample ? 'Nächste Vokabel' : 'Antwort überprüfen',
           onPressed: showExample ? _nextQuestion : _handleAnswer,
         ),
