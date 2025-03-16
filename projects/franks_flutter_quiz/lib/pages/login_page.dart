@@ -12,37 +12,21 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
 
   String _username = '';
   String _password = '';
-  bool _isLoading = false;
+  bool isLogin = false;
   String? _errorMessage;
 
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
     setState(() {
-      _isLoading = true;
+      isLogin = true;
       _errorMessage = null;
     });
 
     try {
-      // Hier die eigentliche Login-Logik einfügen, z. B. mit Firebase:
-      // await FirebaseAuth.instance.signInWithEmailAndPassword(
-      //   email: _username,
-      //   password: _password,
-      // );
-
-      // Firebase-Anmeldung
-      // UserCredential userCredential = await FirebaseAuth.instance
-      //     .signInWithEmailAndPassword(
-      //     email: _emailController.text.trim(),
-      //     password: _passwordController.text);
-      // Bei Erfolg weiterleiten:
-
-      // Für dieses Beispiel simulieren wir einen Netzwerkaufruf:
       await Future.delayed(const Duration(seconds: 2));
 
       // Bei Erfolg: Navigation zur Hauptseite
@@ -64,7 +48,7 @@ class _LoginPageState extends State<LoginPage> {
     } finally {
       if (mounted) {
         setState(() {
-          _isLoading = false;
+          isLogin = false;
         });
       }
     }
@@ -130,7 +114,7 @@ class _LoginPageState extends State<LoginPage> {
                       onSaved: (value) => _password = value!,
                     ),
                     const SizedBox(height: 24),
-                    _isLoading
+                    isLogin
                         ? const CircularProgressIndicator()
                         : ElevatedButton(
                             onPressed: _login,

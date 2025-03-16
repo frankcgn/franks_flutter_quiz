@@ -458,7 +458,7 @@ class _QuizPageState extends State<QuizPage> with RestorationMixin {
   Widget buildAnswerInput(BuildContext context) {
     final Orientation orientation = MediaQuery.of(context).orientation;
     final TextStyle answerTextStyle = TextStyle(
-      fontSize: 16,
+      fontSize: 16, // fontsize der Antwort
       color: showExample
           ? (quizState == NewQuizState.correctAnswer
               ? Colors.green

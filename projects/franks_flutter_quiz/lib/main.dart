@@ -1,3 +1,5 @@
+// auth.dart
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +9,7 @@ import 'package:provider/provider.dart';
 import '../models/appSettings.dart';
 import '../models/global_state.dart';
 import '../models/vocabulary.dart';
+import '../pages/auth/auth_widget_tree.dart';
 import '../pages/home_page.dart';
 import '../pages/info_page.dart';
 import '../pages/login_page.dart';
@@ -54,6 +57,7 @@ class _MyAppState extends State<MyApp> {
   AppSettings settings = AppSettings();
   bool settingsLoaded = false;
   bool userAutorized = true;
+  bool useFirebaseAuth = false;
   final List<Vocabulary> vocabularies = [];
   final bool quizGerman = true;
 
@@ -122,15 +126,26 @@ class _MyAppState extends State<MyApp> {
                   settings: this.settings, onSettingsChanged: updateSettings),
             );
           case '/home':
-            if (userAutorized) {
+            if (useFirebaseAuth) {
+              // for Firebase-Auth-Module
               return MaterialPageRoute(
-                builder: (context) => HomePage(
+                builder: (context) => AuthWidgetTree(
                     settings: this.settings, onSettingsChanged: updateSettings),
               );
             } else {
-              return MaterialPageRoute(
-                builder: (context) => LoginPage(),
-              );
+              if (userAutorized) {
+                // own auth-module
+                return MaterialPageRoute(
+                  builder: (context) => HomePage(
+                      settings: this.settings,
+                      onSettingsChanged: updateSettings),
+                );
+              } else {
+                // no auth-module
+                return MaterialPageRoute(
+                  builder: (context) => LoginPage(),
+                );
+              }
             }
           case '/settings':
             return MaterialPageRoute(

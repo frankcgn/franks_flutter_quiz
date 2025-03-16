@@ -33,16 +33,14 @@ dependencies:
   flutter_tts: ^3.5.0
   auto_size_text: ^3.0.0
   firebase_core: ^2.32.0
+  firebase_auth: ^4.0.0
   cloud_firestore: ^4.17.5
   uuid: ^3.0.6
   intl: ^0.18.1
   file_picker: ^9.0.2
   csv: ^6.0.0
   provider: ^6.1.2
-  firebase_auth: ^4.0.0
-  #firebase_core: 3.6.0
-  #firebase_auth: 5.3.1
-  #cloud_firestore: 5.4.4
+
   #firebase_messaging: 15.1.3
   #firebase_storage: 12.3.3
   #cloud_functions: 5.1.3

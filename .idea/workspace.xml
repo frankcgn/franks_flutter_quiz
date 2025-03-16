@@ -4,10 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ae404f1f-f59e-4b7d-9848-53b6e9597e58" name="Changes" comment="entfernung überflüssiger linien">
+    <list default="true" id="ae404f1f-f59e-4b7d-9848-53b6e9597e58" name="Changes" comment="Firebase Auth pages hinzugefügt">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/GoogleService-Info.plist" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/GoogleService-Info.plist" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/ios/Podfile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/ios/Podfile.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/main.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/login_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/login_page.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/quiz_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/quiz_page.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/widgets/input_field_container.dart" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/widgets/input_field_container.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/pubspec.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projects/franks_flutter_quiz/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/projects/franks_flutter_quiz/pubspec.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -73,6 +79,7 @@
       <recent name="$PROJECT_DIR$/projects/franks_flutter_quiz/assets/icons" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/auth" />
       <recent name="$PROJECT_DIR$/projects/franks_flutter_quiz/assets/csv" />
       <recent name="$PROJECT_DIR$/projects/franks_flutter_quiz/assets/flags" />
       <recent name="$PROJECT_DIR$/projects/franks_flutter_quiz/lib/services" />
@@ -105,7 +112,7 @@
       <workItem from="1740218753594" duration="5369000" />
       <workItem from="1740236004224" duration="659000" />
       <workItem from="1740236692458" duration="71612000" />
-      <workItem from="1741423142874" duration="103963000" />
+      <workItem from="1741423142874" duration="124855000" />
     </task>
     <task id="LOCAL-00001" summary="Model angepasst">
       <option name="closed" value="true" />
@@ -339,7 +346,23 @@
       <option name="project" value="LOCAL" />
       <updated>1741899804102</updated>
     </task>
-    <option name="localTasksCounter" value="30" />
+    <task id="LOCAL-00030" summary="Fix button nicht sichtbar">
+      <option name="closed" value="true" />
+      <created>1741900177898</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1741900177898</updated>
+    </task>
+    <task id="LOCAL-00031" summary="Firebase Auth pages hinzugefügt">
+      <option name="closed" value="true" />
+      <created>1742119598842</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1742119598842</updated>
+    </task>
+    <option name="localTasksCounter" value="32" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -357,8 +380,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Model angepasst" />
-    <MESSAGE value="Aktuelle Daten aus Datenbank laden" />
     <MESSAGE value="Aktuelle Daten in Datenbank speichern" />
     <MESSAGE value="Aktuelle Updated in Datenbank speichern" />
     <MESSAGE value="quiz widgets refactory" />
@@ -382,7 +403,9 @@
     <MESSAGE value="bottom items verkleinert" />
     <MESSAGE value="fix status counter und Vokbelabfrage (Null Pointer)" />
     <MESSAGE value="entfernung überflüssiger linien" />
-    <option name="LAST_COMMIT_MESSAGE" value="entfernung überflüssiger linien" />
+    <MESSAGE value="Fix button nicht sichtbar" />
+    <MESSAGE value="Firebase Auth pages hinzugefügt" />
+    <option name="LAST_COMMIT_MESSAGE" value="Firebase Auth pages hinzugefügt" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
@@ -433,6 +456,16 @@
           <url>file://$PROJECT_DIR$/projects/franks_flutter_quiz/lib/widgets/input_field_container.dart</url>
           <line>13</line>
           <option name="timeStamp" value="41" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="Dart">
+          <url>file://$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/auth/auth.dart</url>
+          <line>15</line>
+          <option name="timeStamp" value="51" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="Dart">
+          <url>file://$PROJECT_DIR$/projects/franks_flutter_quiz/lib/pages/auth/auth.dart</url>
+          <line>16</line>
+          <option name="timeStamp" value="52" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

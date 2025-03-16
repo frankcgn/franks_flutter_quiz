@@ -24,8 +24,9 @@ class InputFieldContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      // height: 40, // Höhe des Antwortfeldes
       decoration: BoxDecoration(
-        border: Border.all(color: borderColor, width: 3),
+        border: Border.all(color: borderColor, width: 1),
         borderRadius: BorderRadius.circular(16),
       ),
       child: TextField(
